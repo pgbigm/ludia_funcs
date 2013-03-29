@@ -1,0 +1,625 @@
+LOAD '$libdir/ludia_funcs';
+CREATE EXTENSION ludia_funcs;
+SET standard_conforming_strings TO off;
+SET escape_string_warning TO off;
+\pset null '(null)'
+SET ludia_funcs.escape_snippet_keyword TO on;
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\"', '\\');
+ pgs2snippet1 
+--------------
+ @\@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"￥"', '\\');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"￥"', '￥');
+ pgs2snippet1 
+--------------
+ @￥@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\"', '￥');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"""', '"');
+ pgs2snippet1 
+--------------
+ @"@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"”"', '"');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"”"', '”');
+ pgs2snippet1 
+--------------
+ @”@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"""', '”');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\"', '\\\\');
+ pgs2snippet1 
+--------------
+ @\@@\@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\\\"', '\\\\');
+ pgs2snippet1 
+--------------
+ @\\@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\\\"', '\\');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"""', '""');
+ pgs2snippet1 
+--------------
+ @"@@"@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""""', '""');
+ pgs2snippet1 
+--------------
+ @""@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""""', '"');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\"', 'あ\\');
+ pgs2snippet1 
+--------------
+ あ@\@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\"', '\\あ');
+ pgs2snippet1 
+--------------
+ @\@あ
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"あ\\"', 'あ\\');
+ pgs2snippet1 
+--------------
+ @あ\@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\あ"', '\\あ');
+ pgs2snippet1 
+--------------
+ @\あ@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"あ\\"', '\\');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\あ"', '\\');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"あ\\"', 'あ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\あ"', 'あ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"""', 'あ"');
+ pgs2snippet1 
+--------------
+ あ@"@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"""', '"あ');
+ pgs2snippet1 
+--------------
+ @"@あ
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"あ""', 'あ"');
+ pgs2snippet1 
+--------------
+ @あ"@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""あ"', '"あ');
+ pgs2snippet1 
+--------------
+ @"あ@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"あ""', '"');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""あ"', '"');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"あ""', 'あ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""あ"', 'あ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う\\え"', 'う\\え');
+ pgs2snippet1 
+--------------
+ @う\え@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う\\"', 'う\\え');
+ pgs2snippet1 
+--------------
+ @う\@え
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\え"', 'う\\え');
+ pgs2snippet1 
+--------------
+ う@\え@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\"', 'う\\え');
+ pgs2snippet1 
+--------------
+ う@\@え
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う\\え"', 'うえ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う\\"', 'うえ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\え"', 'うえ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う\\え"', 'う');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う"え"', 'う"え');
+ pgs2snippet1 
+--------------
+ @う"え@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う""', 'う"え');
+ pgs2snippet1 
+--------------
+ @う"@え
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""え"', 'う"え');
+ pgs2snippet1 
+--------------
+ う@"え@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"""', 'う"え');
+ pgs2snippet1 
+--------------
+ う@"@え
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う"え"', 'うえ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う""', 'うえ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""え"', 'うえ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"う"え"', 'う');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\\\"', 'あいう\\えお');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\\\"', 'あいう\\\\えお');
+  pgs2snippet1  
+----------------
+ あいう@\\@えお
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\""', 'あいう"えお');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"\\""', 'あいう\\"えお');
+  pgs2snippet1  
+----------------
+ あいう@\"@えお
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"+"', '+');
+ pgs2snippet1 
+--------------
+ @+@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"+"', 'あいう+えお');
+ pgs2snippet1  
+---------------
+ あいう@+@えお
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""+"', 'あいう"+えお');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"-"', '-');
+ pgs2snippet1 
+--------------
+ @-@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"-"', 'あいう-えお');
+ pgs2snippet1  
+---------------
+ あいう@-@えお
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""-"', 'あいう"-えお');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '" え"', 'あいう えお');
+ pgs2snippet1  
+---------------
+ あいう@ え@お
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"" え"', 'あいう" えお');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '', 'あ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, 'あ', '');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""', 'あ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"あ"', '');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '+', '+"\\');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"', '+"\\');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '\\', '+"\\');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""', 'あ');
+ pgs2snippet1 
+--------------
+ (null)
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""', 'あ', 1);
+ERROR:  function pgs2snippet1(integer, integer, integer, unknown, unknown, integer, unknown, unknown, integer) does not exist
+LINE 1: SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '""', 'あ', 1);
+               ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"+"BB"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ @AA@"A+A\B+B"@BB@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"+""B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ @AA@"A+A\B+B@"B@B
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"+"+B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ @AA@"A+A\B@+B@"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"+"\\B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ @AA@"A+A@\B@+B"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A""+"BB"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ A@A"@A+A\B+B"@BB@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A""+""B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ A@A"@A+A\B+B@"B@B
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A""+"+B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ A@A"@A+A\B@+B@"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A""+"\\B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ A@A"@A+A@\B@+B"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A+"+"BB"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ AA"@A+@A\B+B"@BB@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A+"+""B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ AA"@A+@A\B+B@"B@B
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A+"+"+B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ AA"@A+@A\B@+B@"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A+"+"\\B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ AA"@A+@A@\B@+B"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A\\"+"BB"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ AA"A+@A\@B+B"@BB@
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A\\"+""B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ AA"A+@A\@B+B@"B@B
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A\\"+"+B"', 'AA"A+A\\B+B"BB');
+   pgs2snippet1    
+-------------------
+ AA"A+@A\@B@+B@"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"A\\"+"\\B"', 'AA"A+A\\B+B"BB');
+  pgs2snippet1   
+-----------------
+ AA"A+@A\@B+B"BB
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AB"CD"', 'AB"CD');
+ pgs2snippet1 
+--------------
+ @AB"CD@
+(1 row)
+
+SET ludia_funcs.escape_snippet_keyword TO off;
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AB"CD"', 'AB"CD');
+ pgs2snippet1 
+--------------
+ @AB@"CD
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A" + "BBB" + "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A" + "BBB"   "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A" + "BBB" - "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@@BBB@CCCDDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A"   "BBB" + "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A"   "BBB"   "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A"   "BBB" - "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@@BBB@CCCDDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A" - "BBB" + "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@BBB@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A" - "BBB"   "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@BBB@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA\\"A" - "BBB" - "CCC"', 'AA"ABBBCCCDDDEEE');
+    pgs2snippet1    
+--------------------
+ @AA"A@BBBCCCDDDEEE
+(1 row)
+
+SET ludia_funcs.escape_snippet_keyword TO on;
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A" + "BBB" + "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A" + "BBB"   "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A" + "BBB" - "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@@BBB@CCCDDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A"   "BBB" + "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A"   "BBB"   "CCC"', 'AA"ABBBCCCDDDEEE');
+      pgs2snippet1      
+------------------------
+ @AA"A@@BBB@@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A"   "BBB" - "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@@BBB@CCCDDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A" - "BBB" + "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@BBB@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A" - "BBB"   "CCC"', 'AA"ABBBCCCDDDEEE');
+     pgs2snippet1     
+----------------------
+ @AA"A@BBB@CCC@DDDEEE
+(1 row)
+
+SELECT pgs2snippet1(1, 300, 1, '@', '@', 0, '"AA"A" - "BBB" - "CCC"', 'AA"ABBBCCCDDDEEE');
+    pgs2snippet1    
+--------------------
+ @AA"A@BBBCCCDDDEEE
+(1 row)
+

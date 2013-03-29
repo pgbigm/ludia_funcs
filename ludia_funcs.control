@@ -1,0 +1,5 @@
+# ludia_funcs extension
+comment = 'ludia functions'
+default_version = '1.0'
+module_pathname = '$libdir/ludia_funcs'
+relocatable = true
