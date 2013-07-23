@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>ludia_funcs ドキュメント</title>
+<title>Ludia functions ドキュメント</title>
 
 <link rel="stylesheet" type="text/css" href="style.css">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -17,7 +17,7 @@
     </ul>
   </div>
 
-<h1 id="ludia_funcs">ludia_funcs ドキュメント</h1>
+<h1 id="ludia_funcs">ドキュメント</h1>
 
 <div class="index">
 <ol>
@@ -31,8 +31,8 @@
 </div>
 
 <h2 id="description">概要</h2>
-<p>ludia_funcs(ルディア・ファンクス)は、文字列の正規化関数とスニペット作成関数を提供するモジュールです。それらの関数は全文検索モジュール<a href="http://ludia.sourceforge.jp/moin.cgi/">Ludia</a>が提供していたものと同じです。 ludia_funcsは、それらの関数を<a href="http://www.postgresql.org/">PostgreSQL</a>9.1以降で利用可能にしています。</p>
-<p><a href="http://sourceforge.jp/projects/ludiafuncs/">ludia_funcsプロジェクト</a>では以下2つのモジュールを提供します。</p>
+<p>Ludia functionsは、文字列の正規化関数とスニペット作成関数を提供するモジュールです。それらの関数は全文検索モジュール<a href="http://ludia.sourceforge.jp/moin.cgi/">Ludia</a>が提供していたものと同じです。 Ludia functionsは、それらの関数を<a href="http://www.postgresql.org/">PostgreSQL</a>9.1以降で利用可能にしています。</p>
+<p><a href="http://sourceforge.jp/projects/ludiafuncs/">Ludia functionsプロジェクト</a>では以下2つのモジュールを提供します。</p>
 
 <table>
 <thead>
@@ -41,7 +41,7 @@
 </tr>
 </thead>
 <tbody>
-<tr><td>ludia_funcs</td>
+<tr><td>Ludia functions</td>
   <td nowrap>文字列の正規化関数とスニペット作成関数を提供するモジュール</td>
   <td>ludia_funcs-YYYYMMDD.tar.gz</td></tr>
 <tr><td>senna-1.1.2-fast</td>
@@ -54,11 +54,11 @@
 
 <p>各提供モジュールのライセンスはLGPLv2.1です。</p>
 
-<p>ludia_funcsは、提供モジュールの一つである性能改善版のSennaと組み合わせて使いうことで、Ludia同様に文字列の正規化やスニペット作成を行います。</p>
+<p>Ludia functionsは、提供モジュールの一つである性能改善版のSennaと組み合わせて使いうことで、Ludia同様に文字列の正規化やスニペット作成を行います。</p>
 
-<p>ludia_funcsは、様々な形式のファイルからテキストを抽出する関数も提供します。この関数を利用するには、商用ソフトウェアの<a href="http://www.antenna.co.jp/axx/">TextPorter</a>を別途購入する必要があります。 (TextPorter Ver.5 Copyright(c) 1999-　Antenna House, Inc.)</p>
+<p>Ludia functionsは、様々な形式のファイルからテキストを抽出する関数も提供します。この関数を利用するには、商用ソフトウェアの<a href="http://www.antenna.co.jp/axx/">TextPorter</a>を別途購入する必要があります。 (TextPorter Ver.5 Copyright(c) 1999-　Antenna House, Inc.)</p>
 <h2 id="requirement">動作確認環境</h2>
-<p>ludia_funcsは、以下の環境で動作確認しています。</p>
+<p>Ludia functionsは、以下の環境で動作確認しています。</p>
 
 <table>
 <thead>
@@ -82,9 +82,9 @@
 </tbody>
 </table>
 
-<p>ludia_funcsは、PostgreSQL9.1のみに対応しています。 9.0以前には未対応です。 9.2以降には対応していると思われますが、動作確認していません。</p>
+<p>Ludia functionsは、PostgreSQL9.1のみに対応しています。 9.0以前には未対応です。 9.2以降には対応していると思われますが、動作確認していません。</p>
 
-<p>ludia_funcsは、オリジナルのSenna1.1.2以降とも組み合わせ可能だと思われますが、動作確認していません。 senna-1.1.2-fastを使う場合、ludia_funcsの登録先のデータベースでは、エンコーディングはUTF-8でなければなりません。</p>
+<p>Ludia functionsは、オリジナルのSenna1.1.2以降とも組み合わせ可能だと思われますが、動作確認していません。 senna-1.1.2-fastを使う場合、Ludia functionsの登録先のデータベースでは、エンコーディングはUTF-8でなければなりません。</p>
 
 
 <h2 id="install">インストール</h2>
@@ -102,7 +102,7 @@ $ su
 <ul>
 <li>--prefix : インストール先ディレクトリを指定します。未指定時のインストール先は/usr/local/pgsqlです。このオプション指定は必須ではありません。</li>
 </ul>
-<p>上記手順ではソースコードからPostgreSQLをインストールしています。しかし、RPMなどの他の手順でPostgreSQLをインストールしてもludia_funcsは利用可能です。 RPMインストールのPostgreSQLでludia_funcsを利用するには、postgresql-develパッケージをインストールしなければならないことに注意してください。</p>
+<p>上記手順ではソースコードからPostgreSQLをインストールしています。しかし、RPMなどの他の手順でPostgreSQLをインストールしてもLudia functionsは利用可能です。 RPMインストールのPostgreSQLでLudia functionsを利用するには、postgresql-develパッケージをインストールしなければならないことに注意してください。</p>
 
 
 <h3 id="senna_install">Sennaのインストール</h3>
@@ -121,8 +121,8 @@ $ su
 <li>--without-mecab : <a href="https://code.google.com/p/mecab/">mecab</a>モジュールを使用しないことを指定します。このオプション指定は必須です。</li>
 </ul>
 
-<h3 id="ludia_funcs_install">ludia_funcsのインストール</h3>
-<p><a href="http://sourceforge.jp/projects/ludiafuncs/releases/">ここ</a>からludia_funcsのソースアーカイブファイルをダウンロードし、ビルドとインストールを行います。</p>
+<h3 id="ludia_funcs_install">Ludia functionsのインストール</h3>
+<p><a href="http://sourceforge.jp/projects/ludiafuncs/releases/">ここ</a>からLudia functionsのソースアーカイブファイルをダウンロードし、ビルドとインストールを行います。</p>
 <pre>
 $ tar zxf ludia_funcs-YYYYMMDD.tar.gz
 $ cd ludia_funcs-YYYYMMDD
@@ -137,8 +137,8 @@ $ su
 <li>SENNA_CFG : senna-cfgコマンド(Sennaインストール先のbinディレクトリに存在)のパスを指定します。senna-cfgにPATHが通っているのであれば、このオプション指定は不要です。</li>
 </ul>
 
-<h3 id="ludia_funcs_register">ludia_funcsの登録</h3>
-<p>データベースクラスタの作成後、postgresql.confを編集、PostgreSQLを起動し、ludia_funcsをデータベースに登録します。</p>
+<h3 id="ludia_funcs_register">Ludia functionsの登録</h3>
+<p>データベースクラスタの作成後、postgresql.confを編集、PostgreSQLを起動し、Ludia functionsをデータベースに登録します。</p>
 <pre>
 $ initdb -D $PGDATA --locale=C --encoding=UTF8
 
@@ -159,20 +159,20 @@ $ psql -d &lt;データベース名&gt;
 
 <ul>
 <li>$PGDATAは、データベースクラスタのパスを決めて、そのパスで置き換えてください。</li>
-<li>senna-1.1.2-fastを使う場合、ludia_funcsの登録先のデータベースでは、エンコーディングはUTF-8でなければなりません。</li>
+<li>senna-1.1.2-fastを使う場合、Ludia functionsの登録先のデータベースでは、エンコーディングはUTF-8でなければなりません。</li>
 <li>postgresql.confで、<a href="http://www.postgresql.jp/document/current/html/runtime-config-resource.html#GUC-SHARED-PRELOAD-LIBRARIES">shared_preload_libraries</a>と<a href="http://www.postgresql.jp/document/9.1/html/runtime-config-custom.html#GUC-CUSTOM-VARIABLE-CLASSES">custom_variable_classes</a>にludia_funcsを設定するのは必須です。
   <ul>
     <li>PostgreSQL9.2以降ではcustom_variable_classesは存在しません。設定が必要なのはshared_preload_librariesだけです。</li>
   </ul>
 </li>
-<li>ludia_funcsの登録には、<a href="http://www.postgresql.jp/document/current/html/sql-createextension.html">CREATE EXTENSION</a>を使います。 CREATE EXTENSIONはデータベース単位でモジュールを登録するため、ludia_funcsを利用したいデータベースすべてにおいて登録が必要です。</li>
+<li>Ludia functionsの登録には、<a href="http://www.postgresql.jp/document/current/html/sql-createextension.html">CREATE EXTENSION</a>を使います。 CREATE EXTENSIONはデータベース単位でモジュールを登録するため、Ludia functionsを利用したいデータベースすべてにおいて登録が必要です。</li>
 </ul>
 
-<p>ludia_funcsのインストールは以上で終わりです。</p>
+<p>Ludia functionsのインストールは以上で終わりです。</p>
 
 <h2 id="uninstall">アンインストール</h2>
-<h3 id="delete_ludia_funcs">ludia_funcsの削除</h3>
-<p>ludia_funcsについて、データベースからの登録解除とアンインストールを行います。</p>
+<h3 id="delete_ludia_funcs">Ludia functionsの削除</h3>
+<p>Ludia functionsについて、データベースからの登録解除とアンインストールを行います。</p>
 <pre>
 $ psql -d &lt;データベース名&gt;
 =# DROP EXTENSION ludia_funcs CASCADE;
@@ -186,8 +186,8 @@ $ su
 # exit
 </pre>
 <ul>
-<li>ludia_funcsを登録したすべてのデータベースで登録解除する必要があります。</li>
-<li>ludia_funcsに依存するDBオブジェクトを削除する必要があるため、<a href="http://www.postgresql.jp/document/current/html/sql-dropextension.html">DROP EXTENSION</a>にはCASCADEを指定します。</li>
+<li>Ludia functionsを登録したすべてのデータベースで登録解除する必要があります。</li>
+<li>Ludia functionsに依存するDBオブジェクトを削除する必要があるため、<a href="http://www.postgresql.jp/document/current/html/sql-dropextension.html">DROP EXTENSION</a>にはCASCADEを指定します。</li>
 </ul>
 
 <h3 id="delete_conf">postgresql.confの設定削除</h3>
@@ -306,7 +306,7 @@ $ su
 <p>このエスケープ処理は、<a href="#escape_snippet_keyword">ludia_funcs.escape_snippet_keyword</a>を有効にすることでpgs2snippet1に任せることもできます。</p>
 
 <h3 id="pgs2seninfo">pgs2seninfo</h3>
-<p>pgs2seninfoは、ludia_funcsが利用しているSennaのバージョン情報を表示する関数です。</p>
+<p>pgs2seninfoは、Ludia functionsが利用しているSennaのバージョン情報を表示する関数です。</p>
 <ul>
     <li>戻り値1(text) - 利用しているSennaのバージョン番号</li>
     <li>戻り値2(text) - 利用しているSennaのconfigureオプション</li>
@@ -322,7 +322,7 @@ $ su
 
 <h2 id="parametares">パラメータ</h2>
 <h3 id="last_update">ludia_funcs.lastupdate</h3>
-<p>ludia_funcs.last_updateは、ludia_funcsモジュールの最終更新日付を報告するパラメータです。このパラメータは読み取り専用です。 postgresql.confやSET文で設定値を変更することはできません。</p>
+<p>ludia_funcs.last_updateは、Ludia functionsモジュールの最終更新日付を報告するパラメータです。このパラメータは読み取り専用です。 postgresql.confやSET文で設定値を変更することはできません。</p>
 
 <p>実行例</p>
 <pre>
