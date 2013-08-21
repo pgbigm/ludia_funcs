@@ -28,6 +28,10 @@
 #include "utils/guc.h"
 #include "miscadmin.h"
 
+#if PG_VERSION_NUM >= 90300
+#include "access/htup_details.h"
+#endif
+
 PG_MODULE_MAGIC;
 
 /* Last update date of ludia_funcs */
