@@ -75,6 +75,7 @@ static bool			EscapeSnippetKeyword(char **s, size_t *slen);
 
 #ifdef TEXTPORTER
 #define TEXTPORTER_TMPDIR			"/tmp"
+#define TEXTPORTER_MKSTEMP_UMASK 		0177
 #define TEXTPORTER_GROUPNAME		"UTF-8"
 #define TEXTPORTER_DEFLANGNAME		"Japanese"
 #define TEXTPORTER_BBIGENDIAN		1
@@ -83,6 +84,7 @@ static bool			EscapeSnippetKeyword(char **s, size_t *slen);
 #define TEXTPORTER_OPTION1			0x00010000	/* DMC_GETTEXT_OPT1_TXCONV */
 #define TEXTPORTER_SIZE				0
 #define TEXTPORTER_CSV_C			0
+
 
 /* GUC variables for pgs2textpoter1 */
 static int	textporter_error = ERROR;
@@ -239,6 +241,7 @@ pgs2textporter1(PG_FUNCTION_ARGS)
 	text	*result = NULL;
 	struct stat	statbuf;
 	bool	return_null = false;
+	mode_t	oumask;
 
 	/* Confirm that database encoding is UTF-8 */
 	GetSennaEncoding();
@@ -248,8 +251,13 @@ pgs2textporter1(PG_FUNCTION_ARGS)
 		/*
 		 * Generate a unique temporary filename where text data gotten
 		 * from application file by TextPorter is stored temporarily.
+		 * Set the permission of a temporary file to 0600 to ensure that
+		 * only the owner of PostgreSQL server can read and write the file.
 		 */
+		oumask = umask(TEXTPORTER_MKSTEMP_UMASK);
 		tmpfd = mkstemp(txtfile);
+		umask(oumask);
+
 		if (tmpfd < 0)
 			ereport(ERROR,
 					(errcode_for_file_access(),
