@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
  *
- * Copyright (c) 2006-2013, NTT DATA Corporation
+ * Copyright (c) 2006-2015, NTT DATA Corporation
  * All rights reserved.
  *
  * Changelog:
