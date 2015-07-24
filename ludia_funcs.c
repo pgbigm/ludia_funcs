@@ -17,10 +17,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#if PG_VERSION_NUM >= 90300
-#include "access/htup_details.h"
-#endif
-
 #include "catalog/pg_type.h"
 #include "fmgr.h"
 #include "funcapi.h"
