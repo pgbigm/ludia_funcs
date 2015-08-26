@@ -157,3 +157,15 @@ SELECT pgs2norm('あｲうｴおａbｃdｅかｷくｹこｊkｌmｎ') FROM gen
 SELECT pgs2norm(repeat(chr(13078),10) || chr(65018) || 'あｲうｴおａbｃdｅ' || chr(65018) || repeat(chr(13078),10) || 'かｷくｹこjｋlｍn' || chr(65018) || repeat(chr(13078),10));
 SELECT pgs2norm(repeat(chr(13078),10) || chr(65018) || repeat(chr(13078),10) || chr(65018) || repeat(chr(13078),10));
 SELECT pgs2norm(repeat(chr(8279),8));
+
+-- Clean up the objects that a prior regression test created
+SET client_min_messages TO 'warning';
+DROP DATABASE IF EXISTS regtest_ludia_funcs_eucjp;
+RESET client_min_messages;
+
+-- Test the case where database encoding is not UTF8
+CREATE DATABASE regtest_ludia_funcs_eucjp ENCODING 'EUC_JP' TEMPLATE template0;
+\c regtest_ludia_funcs_eucjp
+CREATE EXTENSION ludia_funcs;
+SELECT * FROM pgs2norm('abc');
+SELECT pgs2snippet1(1,300,1,'@','@',0,'CDE','abcdefg');
