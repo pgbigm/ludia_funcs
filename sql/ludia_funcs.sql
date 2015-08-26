@@ -145,3 +145,15 @@ SELECT pgs2snippet1(1,3000,1,'∇','∇',0,'"' || repeat(chr(13078),10) || repea
 SELECT pgs2snippet1(1,300,1,'∇','∇',0,repeat('x',300),'abcde');
 SELECT pgs2snippet1(1,300,1,'∇','∇',0,repeat('+',300),'+');
 SELECT pgs2snippet1(1,300,1,'∇','∇',0,'エおA','あｲうｴおａbｃdｅかｷくｹこjｋlｍn') FROM generate_series(1,10);
+
+-- pgs2norm() checks
+SELECT pgs2norm(NULL);
+
+SELECT count(pgs2norm(chr(code))) FROM generate_series(1, 55295) code;
+SELECT count(pgs2norm(chr(code))) FROM generate_series(57344, 1114111) code;
+
+SELECT pgs2norm('あｲうｴおａbｃdｅかｷくｹこｊkｌmｎ') FROM generate_series(1,10);
+
+SELECT pgs2norm(repeat(chr(13078),10) || chr(65018) || 'あｲうｴおａbｃdｅ' || chr(65018) || repeat(chr(13078),10) || 'かｷくｹこjｋlｍn' || chr(65018) || repeat(chr(13078),10));
+SELECT pgs2norm(repeat(chr(13078),10) || chr(65018) || repeat(chr(13078),10) || chr(65018) || repeat(chr(13078),10));
+SELECT pgs2norm(repeat(chr(8279),8));
