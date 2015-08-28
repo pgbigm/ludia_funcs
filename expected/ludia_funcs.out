@@ -1,6 +1,5 @@
 \pset null '(null)'
 -- Load ludia_funcs module
-LOAD '$libdir/ludia_funcs';
 CREATE EXTENSION ludia_funcs;
 SET standard_conforming_strings TO off;
 SET escape_string_warning TO off;
@@ -759,6 +758,8 @@ SELECT pgs2norm(repeat(chr(8279),8));
  ′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′
 (1 row)
 
+-- Clean up ludia_funcs module
+DROP EXTENSION ludia_funcs;
 -- Clean up the objects that a prior regression test created
 SET client_min_messages TO 'warning';
 DROP DATABASE IF EXISTS regtest_ludia_funcs_eucjp;

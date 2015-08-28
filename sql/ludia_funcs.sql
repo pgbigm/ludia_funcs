@@ -1,7 +1,6 @@
 \pset null '(null)'
 
 -- Load ludia_funcs module
-LOAD '$libdir/ludia_funcs';
 CREATE EXTENSION ludia_funcs;
 
 SET standard_conforming_strings TO off;
@@ -157,6 +156,9 @@ SELECT pgs2norm('あｲうｴおａbｃdｅかｷくｹこｊkｌmｎ') FROM gen
 SELECT pgs2norm(repeat(chr(13078),10) || chr(65018) || 'あｲうｴおａbｃdｅ' || chr(65018) || repeat(chr(13078),10) || 'かｷくｹこjｋlｍn' || chr(65018) || repeat(chr(13078),10));
 SELECT pgs2norm(repeat(chr(13078),10) || chr(65018) || repeat(chr(13078),10) || chr(65018) || repeat(chr(13078),10));
 SELECT pgs2norm(repeat(chr(8279),8));
+
+-- Clean up ludia_funcs module
+DROP EXTENSION ludia_funcs;
 
 -- Clean up the objects that a prior regression test created
 SET client_min_messages TO 'warning';

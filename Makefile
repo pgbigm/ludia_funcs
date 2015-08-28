@@ -20,6 +20,11 @@ PG_CPPFLAGS += -DDMC_LINUX_X86_64 -DTEXTPORTER -I$(TEXTPORTER)/Include
 SHLIB_LINK += -L$(TEXTPORTER)/Lib -ldmc_txif
 endif
 
+ifdef PGS2_DEBUG
+PG_CPPFLAGS += -DPGS2_DEBUG
+REGRESS += pgs2-debug
+endif
+
 ifdef USE_PGXS
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
