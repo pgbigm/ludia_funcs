@@ -6,6 +6,8 @@ DATA = ludia_funcs--1.0.sql
 
 REGRESS = ludia_funcs
 
+EXTRA_CLEAN = sql/textporter.sql expected/textporter.out
+
 SENNA_CFG = senna-cfg
 SENNA_LIBS = $(shell $(SENNA_CFG) --libs)
 SENNA_LIBPATH := $(patsubst -L%,%,$(filter -L%,$(SENNA_LIBS)))
@@ -18,6 +20,7 @@ SHLIB_LINK += -Wl,-rpath,'$(SENNA_LIBPATH)' $(SENNA_LIBS)
 ifdef TEXTPORTER
 PG_CPPFLAGS += -DDMC_LINUX_X86_64 -DTEXTPORTER -I$(TEXTPORTER)/Include
 SHLIB_LINK += -L$(TEXTPORTER)/Lib -ldmc_txif
+REGRESS += textporter
 endif
 
 ifdef PGS2_DEBUG

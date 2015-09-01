@@ -1,0 +1,101 @@
+\pset null '(null)'
+-- Load ludia_funcs module
+CREATE EXTENSION ludia_funcs;
+-- DMC_GETTEXT_OPT_CRLF
+SET ludia_funcs.textporter_option = 8;
+SET ludia_funcs.textporter_error TO warning;
+-- Test whether pgs2textporter1() can extract the contents from
+-- various types of input files.
+SELECT pgs2snippet1(1,300,1,'∇','∇',0,'データベース',pgs2textporter1('@abs_srcdir@/data/test.txt'));
+                            pgs2snippet1                            
+--------------------------------------------------------------------
+ PostgreSQLは∇データベース∇です。PostgreSQLはオープンソースです。\r+
+ PostgreSQLは∇データベース∇です。PostgreSQLはオープンソースです。\r+
+ PostgreSQLは∇データベース∇です。PostgreSQLはオープンソースです。\r+
+ PostgreSQLは∇データベース∇です。Postg
+(1 row)
+
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+            pgs2textporter1             
+----------------------------------------
+ ﻿PostgreSQLはオープンソースのDBMSです\r+
+ 
+(1 row)
+
+SELECT pgs2textporter1('@abs_srcdir@/data/test.xlsx');
+          pgs2textporter1          
+-----------------------------------
+ ﻿"OSS-DB"\r                       +
+ "PostgreSQL","MySQL","Firebird"\r+
+ \r                               +
+ 
+(1 row)
+
+-- Test whether the setting of textporter_option affects the behavior of
+-- pgs2textporter1() expectedly.
+-- DMC_GETTEXT_OPT_CSV1 and DMC_GETTEXT_OPT_CRLF
+SET ludia_funcs.textporter_option TO 16777224;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.xlsx');
+       pgs2textporter1       
+-----------------------------
+ ﻿OSS-DB\r                   +
+ PostgreSQL,MySQL,Firebird\r+
+ \r                         +
+ 
+(1 row)
+
+-- DMC_GETTEXT_OPT_SHFTAG and DMC_GETTEXT_OPT_LF
+SET ludia_funcs.textporter_option = 262160;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.xlsx');
+                   pgs2textporter1                    
+------------------------------------------------------
+ ﻿<Sheet1:OSS-DB>\r"PostgreSQL","MySQL","Firebird"\r\r
+(1 row)
+
+-- Test the case where textporter_option is set to the minimum value.
+SET ludia_funcs.textporter_option = 0;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+            pgs2textporter1             
+----------------------------------------
+ ﻿PostgreSQLはオープンソースのDBMSです\r+
+ 
+(1 row)
+
+-- Test the case where textporter_option is set to the maximum value.
+SET ludia_funcs.textporter_option = 4294967295;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+           pgs2textporter1            
+--------------------------------------
+ ﻿PostgreSQLはオープンソースのDBMSです
+(1 row)
+
+-- Test the cases where textporter_option is set to the invalid value.
+SET ludia_funcs.textporter_option = -1;
+ERROR:  invalid value for parameter "ludia_funcs.textporter_option": "-1"
+HINT:  Value exceeds unsigned integer range.
+SET ludia_funcs.textporter_option = 4294967296;
+ERROR:  invalid value for parameter "ludia_funcs.textporter_option": "4294967296"
+HINT:  Value exceeds unsigned integer range.
+SET ludia_funcs.textporter_option = 'a';
+ERROR:  invalid value for parameter "ludia_funcs.textporter_option": "a"
+-- Test whether the setting of textporter_error affects the behavior of
+-- pgs2textporter1() expectedly.
+SET ludia_funcs.textporter_error TO notice;
+SELECT pgs2textporter1('@abs_srcdir@/data/noexist');
+NOTICE:  could not get text from application file "@abs_srcdir@/data/noexist"
+DETAIL:  DMC_GetText_V5() failed with errcode 2001
+ pgs2textporter1 
+-----------------
+ (null)
+(1 row)
+
+SET ludia_funcs.textporter_error TO error;
+SELECT pgs2textporter1('@abs_srcdir@/data/noexist');
+ERROR:  could not get text from application file "@abs_srcdir@/data/noexist"
+DETAIL:  DMC_GetText_V5() failed with errcode 2001
+-- Clean up ludia_funcs module
+DROP EXTENSION ludia_funcs;
+-- Test the case where database encoding is not UTF8
+\c regtest_ludia_funcs_eucjp
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+ERROR:  does not support database encoding "EUC_JP"
