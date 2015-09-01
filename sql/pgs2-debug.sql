@@ -39,10 +39,33 @@ SET ludia_funcs.norm_cache_limit TO -1;
 SET work_mem TO '64kB';
 SELECT pgs2norm(repeat(chr(13077),35) || repeat(chr(13183),35));
 
+-- Even if norm_cache_limit is decreased to the smaller size than the current
+-- cache size, the cached result is returned if the argument is the same as
+-- the cached one.
+SET ludia_funcs.norm_cache_limit TO '1kB';
+SELECT pgs2norm(repeat(chr(13077),35) || repeat(chr(13183),35));
+
 -- Check that both input and normalized strings are always cached
 -- if norm_cache_size is set to 0.
 SET ludia_funcs.norm_cache_limit TO 0;
 SELECT pgs2norm(string_agg(chr(num), '')) from generate_series(13056, 13143) num;
+
+-- Unless norm_cache_limit is decreased, the cache memory is not shrunk
+-- even if the memory size that pgs2norm() requests for the cache is very
+-- smaller than the amount of currently-allocated one.
+SET ludia_funcs.norm_cache_limit TO '4kB';
+SELECT pgs2norm(string_agg(chr(num) || chr(12441), '')) FROM generate_series(12353, 12438) num;
+SELECT pgs2norm(string_agg(chr(num) || chr(12443), '')) FROM generate_series(65393, 65437) num;
+
+-- If norm_cache_limit is decreased, the cache memory is shrunk as necessary.
+SET ludia_funcs.norm_cache_limit TO '1kB';
+SELECT pgs2norm(string_agg(chr(num) || chr(12442), '')) FROM generate_series(12449, 12534) num;
+SELECT pgs2norm(string_agg(chr(num) || chr(803) || chr(774), '')) FROM generate_series(65313, 65338) num;
+
+-- If the cached Seena query is returned if the same keyword has been used
+-- the last time in pgs2snippet1().
+SELECT pgs2snippet1(1,300,1,'∇','∇',0,'エおA','あ?う?おａbｃdｅか?く?こjｋlｍn');
+SELECT pgs2snippet1(1,300,1,'∇','∇',0,'エおA','あ?う?おａbｃdｅか?く?こjｋlｍn');
 
 -- Clean up ludia_funcs module
 DROP EXTENSION ludia_funcs;
