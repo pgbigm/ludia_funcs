@@ -20,11 +20,11 @@ CREATE INDEX char_tbl_idx ON char_tbl USING gin (pgs2norm(col1) gin_bigm_ops,
                                                                    pgs2norm(col3) gin_bigm_ops);
 
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM char_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM char_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM char_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
 
 -- Test the case where the columns with VARCHAR data type were indexed
 -- with pg_bigm and pgs2norm function.
@@ -35,11 +35,11 @@ CREATE INDEX varchar_tbl_idx ON varchar_tbl USING gin (pgs2norm(col1) gin_bigm_o
                                                                            pgs2norm(col3) gin_bigm_ops);
 
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM varchar_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM varchar_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM varchar_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
 
 -- Test the case where the columns with TEXT data type were indexed
 -- with pg_bigm and pgs2norm function.
@@ -50,37 +50,91 @@ CREATE INDEX text_tbl_idx ON text_tbl USING gin (pgs2norm(col1) gin_bigm_ops,
                                                                   pgs2norm(col3) gin_bigm_ops);
 
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM text_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM text_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM text_tbl
-			 WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+
+-- Test the case where condition has "AND".
+SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col1) LIKE likequery(pgs2norm('解釈')) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('実装')) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('場合'));
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col1) LIKE likequery(pgs2norm('解釈')) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('実装')) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('場合'));
+SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col1) LIKE likequery(pgs2norm('解釈')) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('ﾕｰｻ゛')) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('ＳｑＬ'));
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col1) LIKE likequery(pgs2norm('解釈')) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('ﾕｰｻ゛')) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('ＳｑＬ'));
+
+-- Test the case where condition has "OR".
+SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col2) LIKE likequery(pgs2norm('ﾊ゜ラメータ')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('㉜')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('  '));
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col2) LIKE likequery(pgs2norm('ﾊ゜ラメータ')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('㉜')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('  '));
+SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col1) LIKE likequery(pgs2norm('ﾊ゜ラメータ')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('㉜')) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('  '));
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col1) LIKE likequery(pgs2norm('ﾊ゜ラメータ')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('㉜')) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('  '));
+
+-- Test the case where condition has "NOT".
+SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col3) LIKE likequery(pgs2norm('ludia')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('㊐')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('Ⓟ'));
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col3) LIKE likequery(pgs2norm('ludia')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('㊐')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('Ⓟ'));
+SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col2) LIKE likequery(pgs2norm('ludia')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('㊐')) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('Ⓟ'));
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    pgs2norm(col2) LIKE likequery(pgs2norm('ludia')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('㊐')) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('Ⓟ'));
 
 -- Test the case where a multi-column index is created on many columns
 CREATE TABLE mc31_tbl (col1 text, col2 char(256), col3 varchar(256), col4 text,
-			 col5 char(256), col6 varchar(256), col7 text, col8 char(256),
-			 col9 varchar(256), col10 text, col11 char(256), col12 varchar(256),
-			 col13 text, col14 char(256), col15 varchar(256), col16 text,
-			 col17 char(256), col18 varchar(256), col19 text, col20 char(256),
-			 col21 varchar(256), col22 text, col23 char(256), col24 varchar(256),
-			 col25 text, col26 char(256), col27 varchar(256), col28 text,
-			 col29 char(256), col30 varchar(256), col31 text);
+    col5 char(256), col6 varchar(256), col7 text, col8 char(256),
+    col9 varchar(256), col10 text, col11 char(256), col12 varchar(256),
+    col13 text, col14 char(256), col15 varchar(256), col16 text,
+    col17 char(256), col18 varchar(256), col19 text, col20 char(256),
+    col21 varchar(256), col22 text, col23 char(256), col24 varchar(256),
+    col25 text, col26 char(256), col27 varchar(256), col28 text,
+    col29 char(256), col30 varchar(256), col31 text);
 CREATE INDEX mc31_tbl_idx ON mc31_tbl USING gin (pgs2norm(col1) gin_bigm_ops,
-			 pgs2norm(col2) gin_bigm_ops, pgs2norm(col3) gin_bigm_ops,
-			 pgs2norm(col4) gin_bigm_ops, pgs2norm(col5) gin_bigm_ops,
-			 pgs2norm(col6) gin_bigm_ops, pgs2norm(col7) gin_bigm_ops,
-			 pgs2norm(col8) gin_bigm_ops, pgs2norm(col9) gin_bigm_ops,
-			 pgs2norm(col10) gin_bigm_ops, pgs2norm(col11) gin_bigm_ops,
-			 pgs2norm(col12) gin_bigm_ops, pgs2norm(col13) gin_bigm_ops,
-			 pgs2norm(col14) gin_bigm_ops, pgs2norm(col15) gin_bigm_ops,
-			 pgs2norm(col16) gin_bigm_ops, pgs2norm(col17) gin_bigm_ops,
-			 pgs2norm(col18) gin_bigm_ops, pgs2norm(col19) gin_bigm_ops,
-			 pgs2norm(col20) gin_bigm_ops, pgs2norm(col21) gin_bigm_ops,
-			 pgs2norm(col22) gin_bigm_ops, pgs2norm(col23) gin_bigm_ops,
-			 pgs2norm(col24) gin_bigm_ops, pgs2norm(col25) gin_bigm_ops,
-			 pgs2norm(col26) gin_bigm_ops, pgs2norm(col27) gin_bigm_ops,
-			 pgs2norm(col28) gin_bigm_ops, pgs2norm(col29) gin_bigm_ops,
-			 pgs2norm(col30) gin_bigm_ops, pgs2norm(col31) gin_bigm_ops);
+    pgs2norm(col2) gin_bigm_ops, pgs2norm(col3) gin_bigm_ops,
+    pgs2norm(col4) gin_bigm_ops, pgs2norm(col5) gin_bigm_ops,
+    pgs2norm(col6) gin_bigm_ops, pgs2norm(col7) gin_bigm_ops,
+    pgs2norm(col8) gin_bigm_ops, pgs2norm(col9) gin_bigm_ops,
+    pgs2norm(col10) gin_bigm_ops, pgs2norm(col11) gin_bigm_ops,
+    pgs2norm(col12) gin_bigm_ops, pgs2norm(col13) gin_bigm_ops,
+    pgs2norm(col14) gin_bigm_ops, pgs2norm(col15) gin_bigm_ops,
+    pgs2norm(col16) gin_bigm_ops, pgs2norm(col17) gin_bigm_ops,
+    pgs2norm(col18) gin_bigm_ops, pgs2norm(col19) gin_bigm_ops,
+    pgs2norm(col20) gin_bigm_ops, pgs2norm(col21) gin_bigm_ops,
+    pgs2norm(col22) gin_bigm_ops, pgs2norm(col23) gin_bigm_ops,
+    pgs2norm(col24) gin_bigm_ops, pgs2norm(col25) gin_bigm_ops,
+    pgs2norm(col26) gin_bigm_ops, pgs2norm(col27) gin_bigm_ops,
+    pgs2norm(col28) gin_bigm_ops, pgs2norm(col29) gin_bigm_ops,
+    pgs2norm(col30) gin_bigm_ops, pgs2norm(col31) gin_bigm_ops);
 \copy mc31_tbl from 'data/test_tbl_31.txt'
 
 SELECT col1 FROM mc31_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('＿Ｓ'));
