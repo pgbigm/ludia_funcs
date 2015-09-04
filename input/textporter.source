@@ -12,6 +12,9 @@ SET ludia_funcs.textporter_error TO warning;
 SELECT pgs2snippet1(1,300,1,'∇','∇',0,'データベース',pgs2textporter1('@abs_srcdir@/data/test.txt'));
 SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
 SELECT pgs2textporter1('@abs_srcdir@/data/test.xlsx');
+SELECT pgs2textporter1('@abs_srcdir@/data/powerpoint2007_test.pptx');
+SELECT pgs2textporter1('@abs_srcdir@/data/pdf1.5_test.pdf');
+SELECT pgs2textporter1('@abs_srcdir@/data/csv_test.csv');
 
 -- Test whether the setting of textporter_option affects the behavior of
 -- pgs2textporter1() expectedly.
