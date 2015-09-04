@@ -1,0 +1,68 @@
+ホーム	 ダウンロード	 ドキュメント
+ コミュニティ	 開発	ドキュメント
+1.概要	2.動作確認環境	3.インストール
+4.アンインストール	5.提供関数	6.パラメータ
+概要	Ludia functionsは、文字列の正規化関数とスニペット作成関数を提供するモジュールです。それらの関数は全文検索モジュールLudiaが提供していたものと同じです。 Ludia functionsは、それらの関数をPostgreSQL9.1以降で利用可能にしています。	Ludia functionsプロジェクトでは以下2つのモジュールを提供します。
+モジュール名	概要	ソースアーカイブファイル名
+Ludia functions 文字列の正規化関数とスニペット作成関数を提供するモジュール ludia_funcs-YYYYMMDD.tar.gz 	senna-1.1.2-fast 組み込み型全文検索エンジンSennaの性能改善版 senna-1.1.2-fast-YYYYMMDD.tar.gz 	ソースアーカイブファイル名のYYYYMMDDの部分は、実際にはそのファイルがリリースされた年月日になります。例えば、2013年4月5日リリースのファイルでは、YYYYMMDDは20130405です。
+各提供モジュールのライセンスはLGPLv2.1です。	Ludia functionsは、提供モジュールの一つである性能改善版のSennaと組み合わせて使いうことで、Ludia同様に文字列の正規化やスニペット作成を行います。	"Ludia functionsは、様々な形式のファイルからテキストを抽出する関数も提供します。この関数を利用するには、商用ソフトウェアのTextPorterを別途購入する必要があります。 (TextPorter Ver.5 Copyright(c) 1999-　Antenna House, Inc.)"
+動作確認環境	Ludia functionsは、以下の環境で動作確認しています。	カテゴリ
+モジュール名	OS Red Hat Enterprise Linux 6.1 x86_64 	DMBMS PostgresSQL9.1 
+Senna senna-1.1.2-fast 	Ludia functionsは、PostgreSQL9.1のみに対応しています。 9.0以前には未対応です。 9.2以降には対応していると思われますが、動作確認していません。	Ludia functionsは、オリジナルのSenna1.1.2以降とも組み合わせ可能だと思われますが、動作確認していません。 senna-1.1.2-fastを使う場合、Ludia functionsの登録先のデータベースでは、エンコーディングはUTF-8でなければなりません。
+インストール	PostgreSQLのインストール	PostgreSQLのオフィシャルサイトからバージョン9.1.X(バージョン番号の下一桁Xは、実際の数字に置き換えてください)のソースアーカイブファイル(postgresql-9.1.X.tar.gz)をダウンロードし、ビルドとインストールを行います。
+$ tar zxf postgresql-9.1.X.tar.gz	$ cd postgresql-9.1.X	$ ./configure --prefix=/opt/pgsql-9.1.X
+$ make	$ su	# make install
+# exit	?--prefix : インストール先ディレクトリを指定します。未指定時のインストール先は/usr/local/pgsqlです。このオプション指定は必須ではありません。	上記手順ではソースコードからPostgreSQLをインストールしています。しかし、RPMなどの他の手順でPostgreSQLをインストールしてもLudia functionsは利用可能です。 RPMインストールのPostgreSQLでLudia functionsを利用するには、postgresql-develパッケージをインストールしなければならないことに注意してください。
+Sennaのインストール	ここからsenna-1.1.2-fastのソースアーカイブファイルをダウンロードし、ビルドとインストールを行います。 Sennaのmakeには長時間かかることに注意してください。	$ tar zxf senna-1.1.2-fast-YYYYMMDD.tar.gz
+$ cd senna-1.1.2-fast-YYYYMMDD	$ ./configure --prefix=/opt/senna-1.1.2-fast --without-mecab	$ make
+$ su	# make install	# exit
+?--prefix : インストール先ディレクトリを指定します。未指定時のインストール先は/usr/localです。このオプション指定は必須ではありません。	?--without-mecab : mecabモジュールを使用しないことを指定します。このオプション指定は必須です。	Ludia functionsのインストール
+ここからLudia functionsのソースアーカイブファイルをダウンロードし、ビルドとインストールを行います。	$ tar zxf ludia_funcs-YYYYMMDD.tar.gz	$ cd ludia_funcs-YYYYMMDD
+$ make USE_PGXS=1 PG_CONFIG=/opt/pgsql-9.1.X/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg	$ su	# make USE_PGXS=1 PG_CONFIG=/opt/pgsql-9.1.X/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg install
+# exit	?USE_PGXS : PostgreSQL関連モジュールをコンパイルするときのオマジナイです。1の指定が必須です。	?PG_CONFIG : pg_configコマンド(PostgreSQLインストール先のbinディレクトリに存在)のパスを指定します。pg_configにPATHが通っているのであれば、このオプション指定は不要です。
+?SENNA_CFG : senna-cfgコマンド(Sennaインストール先のbinディレクトリに存在)のパスを指定します。senna-cfgにPATHが通っているのであれば、このオプション指定は不要です。	Ludia functionsの登録	データベースクラスタの作成後、postgresql.confを編集、PostgreSQLを起動し、Ludia functionsをデータベースに登録します。
+$ initdb -D $PGDATA --locale=C --encoding=UTF8	$ vi $PGDATA/postgresql.conf	shared_preload_libraries = 'ludia_funcs'
+custom_variable_classes = 'ludia_funcs'	$ pg_ctl -D $PGDATA start	$ psql -d <データベース名>
+=# CREATE EXTENSION ludia_funcs;	=# \dx ludia_funcs	           List of installed extensions
+    Name     | Version | Schema |   Description	-------------+---------+--------+-----------------	 ludia_funcs | 1.0     | public | ludia functions
+(1 row)	?$PGDATAは、データベースクラスタのパスを決めて、そのパスで置き換えてください。	?senna-1.1.2-fastを使う場合、Ludia functionsの登録先のデータベースでは、エンコーディングはUTF-8でなければなりません。
+?postgresql.confで、shared_preload_librariesとcustom_variable_classesにludia_funcsを設定するのは必須です。 ?PostgreSQL9.2以降ではcustom_variable_classesは存在しません。設定が必要なのはshared_preload_librariesだけです。	?Ludia functionsの登録には、CREATE EXTENSIONを使います。 CREATE EXTENSIONはデータベース単位でモジュールを登録するため、Ludia functionsを利用したいデータベースすべてにおいて登録が必要です。	Ludia functionsのインストールは以上で終わりです。
+アンインストール	Ludia functionsの削除	Ludia functionsについて、データベースからの登録解除とアンインストールを行います。
+$ psql -d <データベース名>	=# DROP EXTENSION ludia_funcs CASCADE;	=# \q
+$ pg_ctl -D $PGDATA stop	$ su	# cd <ludia_funcsのソースディレクトリ>
+# make USE_PGXS=1 PG_CONFIG=/opt/pgsql-9.1.X/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg uninstall	# exit	?Ludia functionsを登録したすべてのデータベースで登録解除する必要があります。
+?Ludia functionsに依存するDBオブジェクトを削除する必要があるため、DROP EXTENSIONにはCASCADEを指定します。	postgresql.confの設定削除	postgresql.confの以下の設定を削除します。
+?shared_preload_libraries	?custom_variable_classes	?ludia_funcs.* (ludia_funcs.から名前が始まるパラメータ)
+Sennaのアンインストール	senna-1.1.2-fastのソースディレクトリでアンインストールを行います。	$ su
+# cd <senna-1.1.2-fastのソースディレクトリ>	# make uninstall	# exit
+提供関数	pgs2norm	pgs2normは、文字列正規化ルール(NFKCの正規化形式)に則って、文字列(引数1)を正規化する関数です。
+?引数1(text) - 正規化する文字列	?戻り値(text) - 引数1を正規化した文字列	引数1がNULLの場合、戻り値はNULLです。
+NFKCの正規化では、例えば、以下のように文字列を変換します。	?半角カタカナを全角カタカナに変換 ?ｱｲｳｴｵ → アイウエオ	?大文字英字を小文字英字に変換 ?ABCDE → abcde
+?全角英数字を半角英数字に変換 ?ＡｂＣｄＥ１２３ → abcde123	?環境依存文字を変換 ?㌢㍻㊨⑤Ⅷ㈲ → センチ平成右5viii(有)	実行例
+=# SELECT pgs2norm('いロﾊAbＣｄ1２③Ⅳ㈱');	      pgs2norm	 いロハabcd123iv(株)
+pgs2normは、引数と戻り値の文字列をメモリ上にキャッシュします。そして、pgs2normの次回実行時に引数の文字列がキャッシュされているものと同じであれば、正規化処理を行わず、	キャッシュされている戻り値を直接返却することで、処理を高速化します。 	pgs2normは、引数と戻り値をキャッシュする際、前回までのキャッシュを破棄します。つまり、キャッシュできる引数と戻り値は直前実行分の一組だけです。
+キャッシュはセッション単位で行われます。他セッションのキャッシュを、別セッションから実行されたpgs2normで使うことはできません。	pgs2normのキャッシュサイズの上限は、パラメータludia_funcs.norm_cache_limitで指定できます。	pgs2snippet1
+pgs2snippet1は、文字列(引数8)からキーワード(引数7)のスニペット(KWIC)を作成する関数です。	?引数1(integer) - スニペット作成時に正規化するかどうか(する: 1、しない: 0)	?引数2(integer) - 作成するスニペットの最大長(バイト単位で指定)
+?引数3(integer) - 作成するスニペットの数の上限	?引数4(text) - スニペット作成時にキーワードの前に付ける文字列	?引数5(text) - スニペット作成時にキーワードの後ろに付ける文字列
+?引数6(integer) - HTMLの特殊文字をエスケープするかどうか(する: -1、しない: 0)	?引数7(text) - スニペット作成に使うキーワード	?引数8(text) - スニペットの作成元となる文字列
+?戻り値(text) - キーワード(引数7)を使って文字列(引数8)から作成したスニペット文字列	NULLの引数がある場合、戻り値はNULLです。	実行例
+"=# SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'PostgreSQL', '最近、PostgreSQLの利用者が増えています。');"	        pgs2snippet1	 最近、★PostgreSQL★の利用者
+(1 row)	"pgs2snippet1では、キーワード(引数7)に複数の文字列を指定できます。複数指定するには、各文字列を""(半角ダブルクォート)で囲み、それらを+(半角プラス)でつなげます。"	実行例
+"=# SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '""PostgreSQL""+""HINT""', 'pg_hint_planは、PostgreSQLでHINT句を使えるようにするツールです。');"	            pgs2snippet1	 ★hint★_planは、★PostgreSQL★で★HINT★
+(1 row)	?この実行例では、正規化を行う指定(引数1が1)になっているため、キーワードHINTは、小文字のhintにもマッチします。	"キーワード内の""と\は、pgs2snippet1ではメタ文字(""は検索文字列の区切り文字、\はエスケープ文字)として解釈されます。 ""と\を文字そのものとして解釈させるには、それらを\でエスケープしなければなりません。"
+実行例	"=# SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '""\""2-gram\""""', 'pg_bigmは、PostgreSQLで""2-gram""の全文検索を使えるようにするツールです。');"	         pgs2snippet1
+" ostgreSQLで★""2-gram""★の全文検"	(1 row)	このエスケープ処理は、ludia_funcs.escape_snippet_keywordを有効にすることでpgs2snippet1に任せることもできます。
+pgs2seninfo	pgs2seninfoは、Ludia functionsが利用しているSennaのバージョン情報を表示する関数です。	?戻り値1(text) - 利用しているSennaのバージョン番号
+?戻り値2(text) - 利用しているSennaのconfigureオプション	実行例	=# SELECT * FROM pgs2seninfo();
+             version             |              configure_options	---------------------------------+-------------------------------------------------	 1.1.2 (last update: 2013.04.05) |  '--without-mecab' '--prefix=/senna-1.1.2-fast/'
+パラメータ	ludia_funcs.lastupdate	ludia_funcs.last_updateは、Ludia functionsモジュールの最終更新日付を報告するパラメータです。このパラメータは読み取り専用です。 postgresql.confやSET文で設定値を変更することはできません。
+実行例	=# SHOW ludia_funcs.last_update ;	 ludia_funcs.last_update
+ 2013.04.05	(1 row)	ludia_funcs.norm_cache_limit
+ludia_funcs.norm_cache_limitは、pgs2normが確保するキャッシュの上限サイズを指定するパラメータです。設定値はkB単位で指定します。設定値の範囲は -1 ～ 2TB-1B です。	設定値-1(デフォルト値)は、キャッシュサイズ上限としてパラメータwork_memの設定値を使うことを意味します。	設定値0は、キャッシュサイズの上限がない(常にキャッシュする)ことを意味します。
+このパラメータは、postgresql.confとSET文(スーパーユーザに限らずどのユーザからでも)で設定値を変更できます。	ludia_funcs.escape_snippet_keyword	"ludia_funcs.escape_snippet_keywordは、pgs2snippet1のキーワード(引数7)内の""(半角ダブルクォート)と\(半角バックスラッシュ)をエスケープするかどうか指定するパラメータです。デフォルト値はoffで、エスケープしません。"
+"キーワード内の""と\は、pgs2snippet1ではメタ文字(""は検索文字列の区切り文字、\はエスケープ文字)として解釈されます。 ""と\を文字そのものとして解釈させるには、それらを\でエスケープしなければなりません。このパラメータを有効にすると、pgs2snippet1は、文字として解釈させたい""と\を自動的にエスケープします。このようなエスケープ処理をクライアントアプリケーション側で実装済の場合は、このパラメータは無効で構いません。"	このパラメータは、postgresql.confとSET文(スーパーユーザに限らずどのユーザからでも)で設定値を変更できます。	pgs2snippet1に記述されている最後の実行例のSQLは、escape_snippet_keywordを使うことで、以下のように書き換えられます。
+実行例	=# SHOW ludia_funcs.escape_snippet_keyword ;	 ludia_funcs.escape_snippet_keyword
+ off	(1 row)	"=# SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '""""2-gram""""', 'pg_bigmは、PostgreSQLで""2-gram""の全文検索を使えるようにするツールです。');"
+ pgs2snippet1	 (null)	(1 row)
+=# SET ludia_funcs.escape_snippet_keyword TO on;	"=# SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '""""2-gram""""', 'pg_bigmは、PostgreSQLで""2-gram""の全文検索を使えるようにするツールです。');"	         pgs2snippet1
+" ostgreSQLで★""2-gram""★の全文検"	(1 row)	"?キーワード内の先頭と末尾の""は必ずメタ文字(検索文字列の区切り文字)として解釈されます。"
