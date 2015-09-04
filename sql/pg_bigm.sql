@@ -110,6 +110,28 @@ EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
     NOT pgs2norm(col3) LIKE likequery(pgs2norm('㊐')) AND
     NOT pgs2norm(col1) LIKE likequery(pgs2norm('Ⓟ'));
 
+-- Test for UPDATE and DELETE
+UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
+UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
+UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
+SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+
+EXPLAIN (costs off) UPDATE text_tbl SET col1 =
+    (select string_agg(chr(num), '') from generate_series(ascii('㋐'), ascii('㋾')) num)
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('㊀'));
+UPDATE text_tbl SET col1 =
+    (select string_agg(chr(num), '') from generate_series(ascii('㋐'), ascii('㋾')) num)
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('㊀'));
+SELECT count(*) FROM text_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('㊀'));
+EXPLAIN (costs off) DELETE FROM text_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('⑬'));
+DELETE FROM text_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('⑬'));
+SELECT count(*) FROM text_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('⑬'));
+
 -- Test the case where a multi-column index is created on many columns
 CREATE TABLE mc31_tbl (col1 text, col2 char(256), col3 varchar(256), col4 text,
     col5 char(256), col6 varchar(256), col7 text, col8 char(256),
