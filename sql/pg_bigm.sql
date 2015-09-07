@@ -8,6 +8,7 @@ CREATE EXTENSION ludia_funcs;
 SET standard_conforming_strings TO off;
 SET escape_string_warning TO off;
 SET work_mem = '4MB';
+SET maintenance_work_mem TO '512MB';
 SET enable_seqscan TO off;
 SET enable_bitmapscan TO on;
 
@@ -121,6 +122,28 @@ EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
     pgs2norm(col2) LIKE likequery(pgs2norm('ludia')) AND
     NOT pgs2norm(col3) LIKE likequery(pgs2norm('㊐')) AND
     NOT pgs2norm(col1) LIKE likequery(pgs2norm('Ⓟ'));
+
+-- Test for text search with many conditions
+SELECT count(*) FROM text_tbl WHERE
+    (pgs2norm(col1) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col1) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col1) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col2) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col2) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col2) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col3) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col3) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col3) NOT LIKE likequery(pgs2norm('設定')));
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    (pgs2norm(col1) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col1) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col1) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col2) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col2) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col2) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col3) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col3) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col3) NOT LIKE likequery(pgs2norm('設定')));
 
 -- Test for UPDATE and DELETE
 UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
@@ -412,7 +435,9 @@ EXPLAIN (costs off) SELECT col31 FROM mc31_tbl
 -- Test the cases where various text search patterns are used.
 CREATE TABLE abc_tbl (col1 text, col2 text, col3 text);
 \copy abc_tbl from data/abc_data.tsv
-CREATE INDEX abc_idx ON abc_tbl USING gin (pgs2norm(col1) gin_bigm_ops, pgs2norm(col2) gin_bigm_ops, pgs2norm(col3) gin_bigm_ops);
+CREATE INDEX abc_idx ON abc_tbl USING gin
+    (pgs2norm(col1) gin_bigm_ops, pgs2norm(col2) gin_bigm_ops, pgs2norm(col3) gin_bigm_ops)
+    WITH (FASTUPDATE = off);
 
 SELECT count(*) FROM abc_tbl WHERE
     ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
@@ -504,3 +529,58 @@ SELECT count(*) FROM abc_tbl WHERE
     ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) AND
     NOT pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) AND
     NOT pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+
+-- Test whether pg_bigm and pgs2norm can handle all the UTF8 characters
+CREATE UNLOGGED TABLE utf8_tbl (code int, col1 text);
+INSERT INTO utf8_tbl VALUES (-1, NULL);
+INSERT INTO utf8_tbl VALUES (0, '');
+INSERT INTO utf8_tbl SELECT code, repeat(chr(code), 3) FROM generate_series(1, 55295) code;
+INSERT INTO utf8_tbl SELECT code, repeat(chr(code), 3) FROM generate_series(57344, 1114111) code;
+CREATE INDEX utf8_tbl_idx ON utf8_tbl USING gin (pgs2norm(col1) gin_bigm_ops)
+    WITH (FASTUPDATE = off);
+
+-- Test for multi-byte, single-byte, upper-case and lower-case alphabet characters
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('aa')) ORDER BY code;
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('BB')) ORDER BY code;
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｃｃ')) ORDER BY code;
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ＤＤ')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('aa')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('BB')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｃｃ')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ＤＤ')) ORDER BY code;
+
+-- Test for multi-byte, single-byte numbers
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('11')) ORDER BY code;
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('２２')) ORDER BY code;
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('③③')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('11')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('２２')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('③③')) ORDER BY code;
+
+-- Test for Japanese katakana
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱｱ')) ORDER BY code;
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('イイ')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱｱ')) ORDER BY code;
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('イイ')) ORDER BY code;
+
+-- Text for NULL
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(NULL)) ORDER BY code;

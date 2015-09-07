@@ -6,6 +6,7 @@ CREATE EXTENSION ludia_funcs;
 SET standard_conforming_strings TO off;
 SET escape_string_warning TO off;
 SET work_mem = '4MB';
+SET maintenance_work_mem TO '512MB';
 SET enable_seqscan TO off;
 SET enable_bitmapscan TO on;
 -- Test the case where the columns with CHAR data type were indexed
@@ -250,6 +251,47 @@ EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
          ->  Bitmap Index Scan on text_tbl_idx
                Index Cond: (pgs2norm(col2) ~~ '%ludia%'::text)
 (6 rows)
+
+-- Test for text search with many conditions
+SELECT count(*) FROM text_tbl WHERE
+    (pgs2norm(col1) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col1) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col1) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col2) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col2) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col2) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col3) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col3) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col3) NOT LIKE likequery(pgs2norm('設定')));
+ count 
+-------
+     1
+(1 row)
+
+EXPLAIN (costs off) SELECT count(*) FROM text_tbl WHERE
+    (pgs2norm(col1) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col1) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col1) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col2) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col2) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col2) NOT LIKE likequery(pgs2norm('設定'))) OR
+	(pgs2norm(col3) LIKE likequery(pgs2norm('文字')) AND
+	pgs2norm(col3) LIKE likequery(pgs2norm('無効')) AND
+	pgs2norm(col3) NOT LIKE likequery(pgs2norm('設定')));
+                                                                                                                                                                                     QUERY PLAN                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate
+   ->  Bitmap Heap Scan on text_tbl
+         Recheck Cond: (((pgs2norm(col1) ~~ '%文字%'::text) AND (pgs2norm(col1) ~~ '%無効%'::text)) OR ((pgs2norm(col2) ~~ '%文字%'::text) AND (pgs2norm(col2) ~~ '%無効%'::text)) OR ((pgs2norm(col3) ~~ '%文字%'::text) AND (pgs2norm(col3) ~~ '%無効%'::text)))
+         Filter: (((pgs2norm(col1) ~~ '%文字%'::text) AND (pgs2norm(col1) ~~ '%無効%'::text) AND (pgs2norm(col1) !~~ '%設定%'::text)) OR ((pgs2norm(col2) ~~ '%文字%'::text) AND (pgs2norm(col2) ~~ '%無効%'::text) AND (pgs2norm(col2) !~~ '%設定%'::text)) OR ((pgs2norm(col3) ~~ '%文字%'::text) AND (pgs2norm(col3) ~~ '%無効%'::text) AND (pgs2norm(col3) !~~ '%設定%'::text)))
+         ->  BitmapOr
+               ->  Bitmap Index Scan on text_tbl_idx
+                     Index Cond: ((pgs2norm(col1) ~~ '%文字%'::text) AND (pgs2norm(col1) ~~ '%無効%'::text))
+               ->  Bitmap Index Scan on text_tbl_idx
+                     Index Cond: ((pgs2norm(col2) ~~ '%文字%'::text) AND (pgs2norm(col2) ~~ '%無効%'::text))
+               ->  Bitmap Index Scan on text_tbl_idx
+                     Index Cond: ((pgs2norm(col3) ~~ '%文字%'::text) AND (pgs2norm(col3) ~~ '%無効%'::text))
+(11 rows)
 
 -- Test for UPDATE and DELETE
 UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
@@ -1116,7 +1158,9 @@ EXPLAIN (costs off) SELECT col31 FROM mc31_tbl
 -- Test the cases where various text search patterns are used.
 CREATE TABLE abc_tbl (col1 text, col2 text, col3 text);
 \copy abc_tbl from data/abc_data.tsv
-CREATE INDEX abc_idx ON abc_tbl USING gin (pgs2norm(col1) gin_bigm_ops, pgs2norm(col2) gin_bigm_ops, pgs2norm(col3) gin_bigm_ops);
+CREATE INDEX abc_idx ON abc_tbl USING gin
+    (pgs2norm(col1) gin_bigm_ops, pgs2norm(col2) gin_bigm_ops, pgs2norm(col3) gin_bigm_ops)
+    WITH (FASTUPDATE = off);
 SELECT count(*) FROM abc_tbl WHERE
     ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
     pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) AND
@@ -1251,4 +1295,375 @@ SELECT count(*) FROM abc_tbl WHERE
 -------
    169
 (1 row)
+
+-- Test whether pg_bigm and pgs2norm can handle all the UTF8 characters
+CREATE UNLOGGED TABLE utf8_tbl (code int, col1 text);
+INSERT INTO utf8_tbl VALUES (-1, NULL);
+INSERT INTO utf8_tbl VALUES (0, '');
+INSERT INTO utf8_tbl SELECT code, repeat(chr(code), 3) FROM generate_series(1, 55295) code;
+INSERT INTO utf8_tbl SELECT code, repeat(chr(code), 3) FROM generate_series(57344, 1114111) code;
+CREATE INDEX utf8_tbl_idx ON utf8_tbl USING gin (pgs2norm(col1) gin_bigm_ops)
+    WITH (FASTUPDATE = off);
+-- Test for multi-byte, single-byte, upper-case and lower-case alphabet characters
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('aa')) ORDER BY code;
+  code  |  col1  
+--------+--------
+     65 | AAA
+     97 | aaa
+    170 | ªªª
+   7468 | ᴬᴬᴬ
+   7491 | ᵃᵃᵃ
+   8336 | ₐₐₐ
+   9398 | ⒶⒶⒶ
+   9424 | ⓐⓐⓐ
+  65313 | ＡＡＡ
+  65345 | ａａａ
+ 119808 | 𝐀𝐀𝐀
+ 119834 | 𝐚𝐚𝐚
+ 119860 | 𝐴𝐴𝐴
+ 119886 | 𝑎𝑎𝑎
+ 119912 | 𝑨𝑨𝑨
+ 119938 | 𝒂𝒂𝒂
+ 119964 | 𝒜𝒜𝒜
+ 119990 | 𝒶𝒶𝒶
+ 120016 | 𝓐𝓐𝓐
+ 120042 | 𝓪𝓪𝓪
+ 120068 | 𝔄𝔄𝔄
+ 120094 | 𝔞𝔞𝔞
+ 120120 | 𝔸𝔸𝔸
+ 120146 | 𝕒𝕒𝕒
+ 120172 | 𝕬𝕬𝕬
+ 120198 | 𝖆𝖆𝖆
+ 120224 | 𝖠𝖠𝖠
+ 120250 | 𝖺𝖺𝖺
+ 120276 | 𝗔𝗔𝗔
+ 120302 | 𝗮𝗮𝗮
+ 120328 | 𝘈𝘈𝘈
+ 120354 | 𝘢𝘢𝘢
+ 120380 | 𝘼𝘼𝘼
+ 120406 | 𝙖𝙖𝙖
+ 120432 | 𝙰𝙰𝙰
+ 120458 | 𝚊𝚊𝚊
+(36 rows)
+
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('BB')) ORDER BY code;
+  code  |  col1  
+--------+--------
+     66 | BBB
+     98 | bbb
+   7470 | ᴮᴮᴮ
+   7495 | ᵇᵇᵇ
+   8492 | ℬℬℬ
+   9399 | ⒷⒷⒷ
+   9425 | ⓑⓑⓑ
+  65314 | ＢＢＢ
+  65346 | ｂｂｂ
+ 119809 | 𝐁𝐁𝐁
+ 119835 | 𝐛𝐛𝐛
+ 119861 | 𝐵𝐵𝐵
+ 119887 | 𝑏𝑏𝑏
+ 119913 | 𝑩𝑩𝑩
+ 119939 | 𝒃𝒃𝒃
+ 119991 | 𝒷𝒷𝒷
+ 120017 | 𝓑𝓑𝓑
+ 120043 | 𝓫𝓫𝓫
+ 120069 | 𝔅𝔅𝔅
+ 120095 | 𝔟𝔟𝔟
+ 120121 | 𝔹𝔹𝔹
+ 120147 | 𝕓𝕓𝕓
+ 120173 | 𝕭𝕭𝕭
+ 120199 | 𝖇𝖇𝖇
+ 120225 | 𝖡𝖡𝖡
+ 120251 | 𝖻𝖻𝖻
+ 120277 | 𝗕𝗕𝗕
+ 120303 | 𝗯𝗯𝗯
+ 120329 | 𝘉𝘉𝘉
+ 120355 | 𝘣𝘣𝘣
+ 120381 | 𝘽𝘽𝘽
+ 120407 | 𝙗𝙗𝙗
+ 120433 | 𝙱𝙱𝙱
+ 120459 | 𝚋𝚋𝚋
+(34 rows)
+
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｃｃ')) ORDER BY code;
+  code  |  col1  
+--------+--------
+     67 | CCC
+     99 | ccc
+   7580 | ᶜᶜᶜ
+   8450 | ℂℂℂ
+   8493 | ℭℭℭ
+   8557 | ⅭⅭⅭ
+   8573 | ⅽⅽⅽ
+   9400 | ⒸⒸⒸ
+   9426 | ⓒⓒⓒ
+  13252 | ㏄㏄㏄
+  65315 | ＣＣＣ
+  65347 | ｃｃｃ
+ 119810 | 𝐂𝐂𝐂
+ 119836 | 𝐜𝐜𝐜
+ 119862 | 𝐶𝐶𝐶
+ 119888 | 𝑐𝑐𝑐
+ 119914 | 𝑪𝑪𝑪
+ 119940 | 𝒄𝒄𝒄
+ 119966 | 𝒞𝒞𝒞
+ 119992 | 𝒸𝒸𝒸
+ 120018 | 𝓒𝓒𝓒
+ 120044 | 𝓬𝓬𝓬
+ 120096 | 𝔠𝔠𝔠
+ 120148 | 𝕔𝕔𝕔
+ 120174 | 𝕮𝕮𝕮
+ 120200 | 𝖈𝖈𝖈
+ 120226 | 𝖢𝖢𝖢
+ 120252 | 𝖼𝖼𝖼
+ 120278 | 𝗖𝗖𝗖
+ 120304 | 𝗰𝗰𝗰
+ 120330 | 𝘊𝘊𝘊
+ 120356 | 𝘤𝘤𝘤
+ 120382 | 𝘾𝘾𝘾
+ 120408 | 𝙘𝙘𝙘
+ 120434 | 𝙲𝙲𝙲
+ 120460 | 𝚌𝚌𝚌
+(36 rows)
+
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ＤＤ')) ORDER BY code;
+  code  |  col1  
+--------+--------
+     68 | DDD
+    100 | ddd
+   7472 | ᴰᴰᴰ
+   7496 | ᵈᵈᵈ
+   8517 | ⅅⅅⅅ
+   8518 | ⅆⅆⅆ
+   8558 | ⅮⅮⅮ
+   8574 | ⅾⅾⅾ
+   9401 | ⒹⒹⒹ
+   9427 | ⓓⓓⓓ
+  65316 | ＤＤＤ
+  65348 | ｄｄｄ
+ 119811 | 𝐃𝐃𝐃
+ 119837 | 𝐝𝐝𝐝
+ 119863 | 𝐷𝐷𝐷
+ 119889 | 𝑑𝑑𝑑
+ 119915 | 𝑫𝑫𝑫
+ 119941 | 𝒅𝒅𝒅
+ 119967 | 𝒟𝒟𝒟
+ 119993 | 𝒹𝒹𝒹
+ 120019 | 𝓓𝓓𝓓
+ 120045 | 𝓭𝓭𝓭
+ 120071 | 𝔇𝔇𝔇
+ 120097 | 𝔡𝔡𝔡
+ 120123 | 𝔻𝔻𝔻
+ 120149 | 𝕕𝕕𝕕
+ 120175 | 𝕯𝕯𝕯
+ 120201 | 𝖉𝖉𝖉
+ 120227 | 𝖣𝖣𝖣
+ 120253 | 𝖽𝖽𝖽
+ 120279 | 𝗗𝗗𝗗
+ 120305 | 𝗱𝗱𝗱
+ 120331 | 𝘋𝘋𝘋
+ 120357 | 𝘥𝘥𝘥
+ 120383 | 𝘿𝘿𝘿
+ 120409 | 𝙙𝙙𝙙
+ 120435 | 𝙳𝙳𝙳
+ 120461 | 𝚍𝚍𝚍
+(38 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('aa')) ORDER BY code;
+                         QUERY PLAN                         
+------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%aa%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%aa%'::text)
+(6 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('BB')) ORDER BY code;
+                         QUERY PLAN                         
+------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%bb%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%bb%'::text)
+(6 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｃｃ')) ORDER BY code;
+                         QUERY PLAN                         
+------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%cc%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%cc%'::text)
+(6 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ＤＤ')) ORDER BY code;
+                         QUERY PLAN                         
+------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%dd%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%dd%'::text)
+(6 rows)
+
+-- Test for multi-byte, single-byte numbers
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('11')) ORDER BY code;
+  code  |  col1  
+--------+--------
+     49 | 111
+    185 | ¹¹¹
+   8321 | ₁₁₁
+   9312 | ①①①
+   9322 | ⑪⑪⑪
+   9342 | ⑾⑾⑾
+   9362 | ⒒⒒⒒
+  13002 | ㋊㋊㋊
+  13155 | ㍣㍣㍣
+  13290 | ㏪㏪㏪
+  65297 | １１１
+ 120783 | 𝟏𝟏𝟏
+ 120793 | 𝟙𝟙𝟙
+ 120803 | 𝟣𝟣𝟣
+ 120813 | 𝟭𝟭𝟭
+ 120823 | 𝟷𝟷𝟷
+(16 rows)
+
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('２２')) ORDER BY code;
+  code  |  col1  
+--------+--------
+     50 | 222
+    178 | ²²²
+   8322 | ₂₂₂
+   9313 | ②②②
+  12882 | ㉒㉒㉒
+  13166 | ㍮㍮㍮
+  13301 | ㏵㏵㏵
+  65298 | ２２２
+ 120784 | 𝟐𝟐𝟐
+ 120794 | 𝟚𝟚𝟚
+ 120804 | 𝟤𝟤𝟤
+ 120814 | 𝟮𝟮𝟮
+ 120824 | 𝟸𝟸𝟸
+(13 rows)
+
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('③③')) ORDER BY code;
+  code  |  col1  
+--------+--------
+     51 | 333
+    179 | ³³³
+   8323 | ₃₃₃
+   9314 | ③③③
+  12893 | ㉝㉝㉝
+  65299 | ３３３
+ 120785 | 𝟑𝟑𝟑
+ 120795 | 𝟛𝟛𝟛
+ 120805 | 𝟥𝟥𝟥
+ 120815 | 𝟯𝟯𝟯
+ 120825 | 𝟹𝟹𝟹
+(11 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('11')) ORDER BY code;
+                         QUERY PLAN                         
+------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%11%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%11%'::text)
+(6 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('２２')) ORDER BY code;
+                         QUERY PLAN                         
+------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%22%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%22%'::text)
+(6 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('③③')) ORDER BY code;
+                         QUERY PLAN                         
+------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%33%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%33%'::text)
+(6 rows)
+
+-- Test for Japanese katakana
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱｱ')) ORDER BY code;
+ code  |  col1  
+-------+--------
+ 12450 | アアア
+ 13008 | ㋐㋐㋐
+ 13058 | ㌂㌂㌂
+ 65393 | ｱｱｱ
+(4 rows)
+
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('イイ')) ORDER BY code;
+ code  |  col1  
+-------+--------
+ 12452 | イイイ
+ 13009 | ㋑㋑㋑
+ 65394 | ｲｲｲ
+(3 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱｱ')) ORDER BY code;
+                          QUERY PLAN                          
+--------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%アア%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%アア%'::text)
+(6 rows)
+
+EXPLAIN (costs off) SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('イイ')) ORDER BY code;
+                          QUERY PLAN                          
+--------------------------------------------------------------
+ Sort
+   Sort Key: code
+   ->  Bitmap Heap Scan on utf8_tbl
+         Recheck Cond: (pgs2norm(col1) ~~ '%イイ%'::text)
+         ->  Bitmap Index Scan on utf8_tbl_idx
+               Index Cond: (pgs2norm(col1) ~~ '%イイ%'::text)
+(6 rows)
+
+-- Text for NULL
+SELECT * FROM utf8_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(NULL)) ORDER BY code;
+ code | col1 
+------+------
+(0 rows)
 
