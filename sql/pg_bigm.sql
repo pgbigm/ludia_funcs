@@ -17,14 +17,18 @@ CREATE TABLE char_tbl (col1 char(256), col2 char(256), col3 char(256));
 \copy char_tbl from data/test_tbl.txt
 CREATE INDEX char_tbl_idx ON char_tbl USING gin (pgs2norm(col1) gin_bigm_ops,
                                                                    pgs2norm(col2) gin_bigm_ops,
-                                                                   pgs2norm(col3) gin_bigm_ops);
+                                                                   pgs2norm(col3) gin_bigm_ops)
+                                                                   WITH (FASTUPDATE = off);
 
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM char_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM char_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM char_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'))
+    ORDER BY col1;
 
 -- Test the case where the columns with VARCHAR data type were indexed
 -- with pg_bigm and pgs2norm function.
@@ -32,14 +36,18 @@ CREATE TABLE varchar_tbl (col1 varchar(256), col2 varchar(256), col3 varchar(256
 \copy varchar_tbl from data/test_tbl.txt
 CREATE INDEX varchar_tbl_idx ON varchar_tbl USING gin (pgs2norm(col1) gin_bigm_ops,
                                                                            pgs2norm(col2) gin_bigm_ops,
-                                                                           pgs2norm(col3) gin_bigm_ops);
+                                                                           pgs2norm(col3) gin_bigm_ops)
+                                                                           WITH (FASTUPDATE = off);
 
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM varchar_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM varchar_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM varchar_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'))
+    ORDER BY col1;
 
 -- Test the case where the columns with TEXT data type were indexed
 -- with pg_bigm and pgs2norm function.
@@ -47,14 +55,18 @@ CREATE TABLE text_tbl (col1 text, col2 text, col3 text);
 \copy text_tbl from data/test_tbl.txt
 CREATE INDEX text_tbl_idx ON text_tbl USING gin (pgs2norm(col1) gin_bigm_ops,
                                                                   pgs2norm(col2) gin_bigm_ops,
-                                                                  pgs2norm(col3) gin_bigm_ops);
+                                                                  pgs2norm(col3) gin_bigm_ops)
+                                                                  WITH (FASTUPDATE = off);
 
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM text_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM text_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM text_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'))
+    ORDER BY col1;
 
 -- Test the case where condition has "AND".
 SELECT count(*) FROM text_tbl WHERE
@@ -115,12 +127,17 @@ UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
 UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
 UPDATE text_tbl SET col1 = col2, col2 = col3, col3 = col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'v(株)', col1) FROM text_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('v(株)'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, '②⓪', col1) FROM text_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('②⓪'))
+    ORDER BY col1;
 SELECT pgs2snippet1(1, 32, 1, '★', '★', 0, 'ｱﾌﾟﾘｹｰｼｮﾝ', col1) FROM text_tbl
-    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'));
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ｱﾌﾟﾘｹｰｼｮﾝ'))
+    ORDER BY col1;
 
+-- The text search for updated or deleted records must return no results
+-- even when recheck is skipped on the text search.
 EXPLAIN (costs off) UPDATE text_tbl SET col1 =
     (select string_agg(chr(num), '') from generate_series(ascii('㋐'), ascii('㋾')) num)
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('㊀'));
@@ -131,6 +148,217 @@ SELECT count(*) FROM text_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('㊀'
 EXPLAIN (costs off) DELETE FROM text_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('⑬'));
 DELETE FROM text_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('⑬'));
 SELECT count(*) FROM text_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('⑬'));
+
+-- Test whether both seq scan and bitmap scan return the same results
+SET enable_seqscan to on;
+SET enable_bitmapscan to off;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田　太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都 山田'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('都 山田'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('都 山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('  山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都  '))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'都\t'))
+    ORDER BY col1;
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('　'));
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(' '));
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(' 山 '))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ポ'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ﾎﾟ'))
+    ORDER BY col1;
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('A'));
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('a'));
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('AA'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('田'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    OR pgs2norm(col1) LIKE likequery(pgs2norm('ポ'))
+    ORDER BY col1;
+
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('都 山田'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('  山'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'都\t'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('　'))
+    ORDER BY col1;
+
+SET enable_seqscan to off;
+SET enable_bitmapscan to on;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田　太郎'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都 山田'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('都 山田'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('都 山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('  山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都  '))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'都\t'))
+    ORDER BY col1;
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('　'));
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(' '));
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(' 山 '))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ポ'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('ﾎﾟ'))
+    ORDER BY col1;
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('A'));
+SELECT count(*) FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('a'));
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('AA'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('田'))
+    ORDER BY col1;
+SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    OR pgs2norm(col1) LIKE likequery(pgs2norm('ポ'))
+    ORDER BY col1;
+
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('都 山田'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('  山'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'都\t'))
+    ORDER BY col1;
+EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('　'))
+    ORDER BY col1;
 
 -- Test the case where a multi-column index is created on many columns
 CREATE TABLE mc31_tbl (col1 text, col2 char(256), col3 varchar(256), col4 text,
@@ -156,46 +384,123 @@ CREATE INDEX mc31_tbl_idx ON mc31_tbl USING gin (pgs2norm(col1) gin_bigm_ops,
     pgs2norm(col24) gin_bigm_ops, pgs2norm(col25) gin_bigm_ops,
     pgs2norm(col26) gin_bigm_ops, pgs2norm(col27) gin_bigm_ops,
     pgs2norm(col28) gin_bigm_ops, pgs2norm(col29) gin_bigm_ops,
-    pgs2norm(col30) gin_bigm_ops, pgs2norm(col31) gin_bigm_ops);
+    pgs2norm(col30) gin_bigm_ops, pgs2norm(col31) gin_bigm_ops)
+    WITH (FASTUPDATE = off);
 \copy mc31_tbl from 'data/test_tbl_31.txt'
 
-SELECT col1 FROM mc31_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('＿Ｓ'));
-EXPLAIN (costs off ) SELECT col1 FROM mc31_tbl WHERE pgs2norm(col1) like likequery(pgs2norm('＿Ｓ'));
+SELECT col1 FROM mc31_tbl
+    WHERE pgs2norm(col1) like likequery(pgs2norm('＿Ｓ'))
+    ORDER BY col1;
+EXPLAIN (costs off ) SELECT col1 FROM mc31_tbl
+    WHERE pgs2norm(col1) like likequery(pgs2norm('＿Ｓ'))
+    ORDER BY col1;
 
-select col15 from mc31_tbl where pgs2norm(col15) like likequery(pgs2norm('ﾃ゛ィ'));
-EXPLAIN (costs off ) select col15 from mc31_tbl where pgs2norm(col15) like likequery(pgs2norm('ﾃ゛ィ'));
+SELECT col15 FROM mc31_tbl
+    WHERE pgs2norm(col15) LIKE likequery(pgs2norm('ﾃ゛ィ'))
+    ORDER BY col15;
+EXPLAIN (costs off ) SELECT col15 FROM mc31_tbl
+    WHERE pgs2norm(col15) LIKE likequery(pgs2norm('ﾃ゛ィ'))
+    ORDER BY col15;
 
-select col31 from mc31_tbl where pgs2norm(col31) like likequery(pgs2norm('㊔'));
-EXPLAIN (costs off) select col31 from mc31_tbl where pgs2norm(col31) like likequery(pgs2norm('㊔'));
+SELECT col31 FROM mc31_tbl
+    WHERE pgs2norm(col31) LIKE likequery(pgs2norm('㊔'))
+    ORDER BY col31;
+EXPLAIN (costs off) SELECT col31 FROM mc31_tbl
+    WHERE pgs2norm(col31) LIKE likequery(pgs2norm('㊔'))
+    ORDER BY col31;
 
--- Test the case where data has a special character like "\t"
-CREATE TABLE snp_tbl (col1 text);
-CREATE INDEX snp_tbl_idx ON snp_tbl USING gin (pgs2norm(col1) gin_bigm_ops);
-INSERT INTO snp_tbl VALUES ('東京都山田太郎');
-INSERT INTO snp_tbl VALUES ('東京都 山田太郎');
-INSERT INTO snp_tbl VALUES ('東京都山田 太郎');
-INSERT INTO snp_tbl VALUES ('東京都 山田 太郎');
-INSERT INTO snp_tbl VALUES (E'東京都\t山田太郎');
+-- Test the cases where various text search patterns are used.
+CREATE TABLE abc_tbl (col1 text, col2 text, col3 text);
+\copy abc_tbl from data/abc_data.tsv
+CREATE INDEX abc_idx ON abc_tbl USING gin (pgs2norm(col1) gin_bigm_ops, pgs2norm(col2) gin_bigm_ops, pgs2norm(col3) gin_bigm_ops);
 
--- Test whether both seq and bitmap scans return the same results
-SET enable_seqscan to on;
-SET enable_bitmapscan to off;
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'));
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田太郎'));
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'));
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'));
-
-SET enable_seqscan to off;
-SET enable_bitmapscan to on;
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'));
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田太郎'));
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'));
-SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都山田太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都 山田 太郎'));
-EXPLAIN (costs off) SELECT * FROM snp_tbl WHERE pgs2norm(col1) LIKE likequery(pgs2norm(E'東京都\t山田太郎'));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) AND
+    pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) OR
+    pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
+SELECT count(*) FROM abc_tbl WHERE
+    ((pgs2norm(col1) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col1) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col2) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col2) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col2) LIKE likequery(pgs2norm('CCC'))) OR
+    ((pgs2norm(col3) LIKE likequery(pgs2norm('AAA')) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('BBB'))) AND
+    NOT pgs2norm(col3) LIKE likequery(pgs2norm('CCC')));
