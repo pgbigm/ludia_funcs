@@ -606,3 +606,6 @@ EXPLAIN (costs off) SELECT * FROM utf8_tbl
 -- Text for NULL
 SELECT * FROM utf8_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm(NULL)) ORDER BY code;
+
+-- Drop utf8_tbl to reduce the impact on subsequent CHECKPOINT
+DROP TABLE utf8_tbl;

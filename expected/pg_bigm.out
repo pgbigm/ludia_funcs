@@ -1839,3 +1839,5 @@ SELECT * FROM utf8_tbl
 ------+------
 (0 rows)
 
+-- Drop utf8_tbl to reduce the impact on subsequent CHECKPOINT
+DROP TABLE utf8_tbl;
