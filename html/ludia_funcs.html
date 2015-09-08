@@ -91,11 +91,11 @@
 <h2 id="install">インストール</h2>
 
 <h3 id="pg_install">PostgreSQLのインストール</h3>
-<p><a href="http://www.postgresql.org/">PostgreSQLのオフィシャルサイト</a>からバージョン9.1.X(バージョン番号の下一桁Xは、実際の数字に置き換えてください)のソースアーカイブファイル(postgresql-9.1.X.tar.gz)をダウンロードし、ビルドとインストールを行います。</p>
+<p><a href="http://www.postgresql.org/">PostgreSQLのオフィシャルサイト</a>からバージョンX.Y.Z(X.Y.Zは実際のバージョン数字に置き換えてください)のソースアーカイブファイル(postgresql-X.Y.Z.tar.gz)をダウンロードし、ビルドとインストールを行います。</p>
 <pre>
-$ tar zxf postgresql-9.1.X.tar.gz
-$ cd postgresql-9.1.X
-$ ./configure --prefix=/opt/pgsql-9.1.X
+$ tar zxf postgresql-X.Y.Z.tar.gz
+$ cd postgresql-X.Y.Z
+$ ./configure --prefix=/opt/pgsql-X.Y.Z
 $ make
 $ su
 # make install
@@ -127,9 +127,9 @@ $ su
 <pre>
 $ tar zxf ludia_funcs-YYYYMMDD.tar.gz
 $ cd ludia_funcs-YYYYMMDD
-$ make USE_PGXS=1 PG_CONFIG=/opt/pgsql-9.1.X/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg
+$ make USE_PGXS=1 PG_CONFIG=/opt/pgsql-X.Y.Z/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg
 $ su
-# make USE_PGXS=1 PG_CONFIG=/opt/pgsql-9.1.X/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg install
+# make USE_PGXS=1 PG_CONFIG=/opt/pgsql-X.Y.Z/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg install
 # exit
 </pre>
 <ul>
@@ -183,7 +183,7 @@ $ pg_ctl -D $PGDATA stop
 $ su
 
 # cd &lt;ludia_funcsのソースディレクトリ&gt;
-# make USE_PGXS=1 PG_CONFIG=/opt/pgsql-9.1.X/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg uninstall
+# make USE_PGXS=1 PG_CONFIG=/opt/pgsql-X.Y.Z/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg uninstall
 # exit
 </pre>
 <ul>
