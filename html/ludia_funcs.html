@@ -44,14 +44,14 @@
 <tbody>
 <tr><td>Ludia functions</td>
   <td nowrap>文字列の正規化関数とスニペット作成関数を提供するモジュール</td>
-  <td>ludia_funcs-YYYYMMDD.tar.gz</td></tr>
+  <td>ludia_funcs-x.y-YYYYMMDD.tar.gz</td></tr>
 <tr><td>senna-1.1.2-fast</td>
   <td nowrap>組み込み型全文検索エンジン<a href="http://qwik.jp/senna/FrontPageJ.html">Senna</a>の性能改善版</td>
   <td>senna-1.1.2-fast-YYYYMMDD.tar.gz</td></tr>
 </tbody>
 </table>
 
-<p>ソースアーカイブファイル名のYYYYMMDDの部分は、実際にはそのファイルがリリースされた年月日になります。例えば、2013年4月5日リリースのファイルでは、YYYYMMDDは20130405です。</p>
+<p>ソースアーカイブファイル名のx.yとYYYYMMDDの部分は、それぞれ、そのファイルのバージョン番号とリリース年月日です。例えば、2015年9月10日リリースのバージョン1.0のファイルでは、x.yは1.0、YYYYMMDDは20150910です。</p>
 
 <p>各提供モジュールのライセンスはLGPLv2.1です。</p>
 
@@ -125,8 +125,8 @@ $ su
 <h3 id="ludia_funcs_install">Ludia functionsのインストール</h3>
 <p><a href="http://osdn.jp/projects/ludiafuncs/releases/">ここ</a>からLudia functionsのソースアーカイブファイルをダウンロードし、ビルドとインストールを行います。</p>
 <pre>
-$ tar zxf ludia_funcs-YYYYMMDD.tar.gz
-$ cd ludia_funcs-YYYYMMDD
+$ tar zxf ludia_funcs-x.y-YYYYMMDD.tar.gz
+$ cd ludia_funcs-x.y-YYYYMMDD
 $ make USE_PGXS=1 PG_CONFIG=/opt/pgsql-X.Y.Z/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg
 $ su
 # make USE_PGXS=1 PG_CONFIG=/opt/pgsql-X.Y.Z/bin/pg_config SENNA_CFG=/opt/senna-1.1.2-fast/bin/senna-cfg install
