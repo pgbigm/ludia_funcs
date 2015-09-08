@@ -35,7 +35,7 @@
 PG_MODULE_MAGIC;
 
 /* Last update date of ludia_funcs */
-#define	PGS2_LAST_UPDATE	"2013.04.05"
+#define	PGS2_LAST_UPDATE	"2015.09.10"
 
 /* GUC variables */
 #ifdef PGS2_DEBUG
