@@ -25,7 +25,7 @@ endif
 
 ifdef PGS2_DEBUG
 PG_CPPFLAGS += -DPGS2_DEBUG
-REGRESS += pgs2-debug
+REGRESS += pgs2_debug
 endif
 
 ifdef USE_PGXS
