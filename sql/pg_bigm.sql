@@ -5,6 +5,7 @@ CREATE EXTENSION pg_bigm;
 CREATE EXTENSION ludia_funcs;
 
 -- Set parameters for the tests
+SET client_min_messages TO LOG;
 SET standard_conforming_strings TO off;
 SET escape_string_warning TO off;
 SET work_mem = '4MB';
@@ -382,6 +383,27 @@ EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
 EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('　'))
     ORDER BY col1;
+
+-- Test whether recheck is skipped expectedly when keyword length is 1 or 2
+SET ludia_funcs.enable_debug TO on;
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都')) ORDER BY col1;
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都')) ORDER BY col1;
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京')) ORDER BY col1;
+SELECT pgs2snippet1(1, 50, 1, '*', '*', 0, '東', col1) FROM text_tbl
+    WHERE pgs2norm(col2) LIKE likequery(pgs2norm('東')) ORDER BY col1;
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('京'));
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山田'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('京都'));
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('太'));
+SET ludia_funcs.enable_debug TO off;
 
 -- Test the case where a multi-column index is created on many columns
 CREATE TABLE mc31_tbl (col1 text, col2 char(256), col3 varchar(256), col4 text,

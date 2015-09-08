@@ -3,6 +3,7 @@
 CREATE EXTENSION pg_bigm;
 CREATE EXTENSION ludia_funcs;
 -- Set parameters for the tests
+SET client_min_messages TO LOG;
 SET standard_conforming_strings TO off;
 SET escape_string_warning TO off;
 SET work_mem = '4MB';
@@ -1065,6 +1066,177 @@ EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
                Index Cond: (pgs2norm(col1) ~~ '% %'::text)
 (6 rows)
 
+-- Test whether recheck is skipped expectedly when keyword length is 1 or 2
+SET ludia_funcs.enable_debug TO on;
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都')) ORDER BY col1;
+LOG:  pgs2malloc(): buflen 2048, needed 22, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都
+LOG:  pgs2malloc(): buflen 2048, needed 46, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都山田太郎
+LOG:  pgs2malloc(): buflen 2048, needed 22, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都
+LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都 山田太郎
+LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都山田 太郎
+LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都 山田 太郎
+LOG:  pgs2malloc(): buflen 2048, needed 47, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都	山田太郎
+LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都山田　太郎
+LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都  山田太郎
+LOG:  pgs2malloc(): buflen 2048, needed 34, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京と京都
+       col1       
+------------------
+ 東京都
+ 東京都  山田太郎
+ 東京都  山田太郎
+ 東京都 山田 太郎
+ 東京都 山田太郎
+ 東京都山田 太郎
+ 東京都山田　太郎
+ 東京都山田太郎
+(8 rows)
+
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都')) ORDER BY col1;
+LOG:  pgs2malloc(): buflen 2048, needed 16, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 京都
+       col1       
+------------------
+ 東京と京都
+ 東京都
+ 東京都  山田太郎
+ 東京都  山田太郎
+ 東京都 山田 太郎
+ 東京都 山田太郎
+ 東京都山田 太郎
+ 東京都山田　太郎
+ 東京都山田太郎
+(9 rows)
+
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京')) ORDER BY col1;
+LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 京
+       col1       
+------------------
+ 東京と京都
+ 東京都
+ 東京都  山田太郎
+ 東京都  山田太郎
+ 東京都 山田 太郎
+ 東京都 山田太郎
+ 東京都山田 太郎
+ 東京都山田　太郎
+ 東京都山田太郎
+(9 rows)
+
+SELECT pgs2snippet1(1, 50, 1, '*', '*', 0, '東', col1) FROM text_tbl
+    WHERE pgs2norm(col2) LIKE likequery(pgs2norm('東')) ORDER BY col1;
+LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東
+LOG:  GetSennaQuery(): quick exit: 東
+LOG:  GetSennaQuery(): quick exit: 東
+LOG:  GetSennaQuery(): quick exit: 東
+LOG:  GetSennaQuery(): quick exit: 東
+LOG:  GetSennaQuery(): quick exit: 東
+LOG:  GetSennaQuery(): quick exit: 東
+LOG:  GetSennaQuery(): quick exit: 東
+LOG:  GetSennaQuery(): quick exit: 東
+       pgs2snippet1       
+--------------------------
+ *東*京と京都
+ *東*京都
+ *東*京都        山田太郎
+ *東*京都  山田太郎
+ *東*京都 山田 太郎
+ *東*京都 山田太郎
+ *東*京都山田 太郎
+ *東*京都山田　太郎
+ *東*京都山田太郎
+(9 rows)
+
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('京'));
+LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 山
+LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 京
+       col1       
+------------------
+ 東京都山田太郎
+ 東京都 山田太郎
+ 東京都山田 太郎
+ 東京都 山田 太郎
+ 東京都  山田太郎
+ 東京都山田　太郎
+ 東京都  山田太郎
+(7 rows)
+
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山田'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('京都'));
+LOG:  pgs2malloc(): buflen 2048, needed 16, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 山田
+LOG:  pgs2malloc(): buflen 2048, needed 16, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 京都
+       col1       
+------------------
+ 東京都山田太郎
+ 東京都 山田太郎
+ 東京都山田 太郎
+ 東京都 山田 太郎
+ 東京都  山田太郎
+ 東京都山田　太郎
+ 東京都  山田太郎
+(7 rows)
+
+SELECT col1 FROM text_tbl
+    WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
+    AND pgs2norm(col1) LIKE likequery(pgs2norm('太'));
+LOG:  pgs2malloc(): buflen 2048, needed 22, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都
+LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 太
+LOG:  pgs2malloc(): buflen 2048, needed 46, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都山田太郎
+LOG:  pgs2norm(): quick exit: 東京都山田太郎
+LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都 山田太郎
+LOG:  pgs2norm(): quick exit: 東京都 山田太郎
+LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都山田 太郎
+LOG:  pgs2norm(): quick exit: 東京都山田 太郎
+LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都 山田 太郎
+LOG:  pgs2norm(): quick exit: 東京都 山田 太郎
+LOG:  pgs2malloc(): buflen 2048, needed 47, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都	山田太郎
+LOG:  pgs2norm(): quick exit: 東京都	山田太郎
+LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都山田　太郎
+LOG:  pgs2norm(): quick exit: 東京都山田　太郎
+LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
+LOG:  pgs2norm(): complete (set result cache): 東京都  山田太郎
+LOG:  pgs2norm(): quick exit: 東京都  山田太郎
+       col1       
+------------------
+ 東京都山田太郎
+ 東京都 山田太郎
+ 東京都山田 太郎
+ 東京都 山田 太郎
+ 東京都  山田太郎
+ 東京都山田　太郎
+ 東京都  山田太郎
+(7 rows)
+
+SET ludia_funcs.enable_debug TO off;
 -- Test the case where a multi-column index is created on many columns
 CREATE TABLE mc31_tbl (col1 text, col2 char(256), col3 varchar(256), col4 text,
     col5 char(256), col6 varchar(256), col7 text, col8 char(256),

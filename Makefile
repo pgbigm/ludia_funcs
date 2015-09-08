@@ -40,4 +40,8 @@ include $(top_srcdir)/contrib/contrib-global.mk
 endif
 
 installcheck-bigm:
+ifdef PGS2_DEBUG
 	$(pg_regress_installcheck) $(REGRESS_OPTS) pg_bigm
+else
+	@echo "WARNING: \"make installcheck-bigm\" command is available only with PGS2_DEBUG enabled"
+endif
