@@ -61,13 +61,20 @@ static bool	escape_snippet_keyword = false;
 #define ISSENNAOPSCHAR(x) (*(x) == '+' || *(x) == '-' || *(x) == ' ')
 
 PG_FUNCTION_INFO_V1(pgs2snippet1);
-Datum	pgs2snippet1(PG_FUNCTION_ARGS);
 PG_FUNCTION_INFO_V1(pgs2norm);
-Datum	pgs2norm(PG_FUNCTION_ARGS);
 PG_FUNCTION_INFO_V1(pgs2textporter1);
-Datum	pgs2textporter1(PG_FUNCTION_ARGS);
 PG_FUNCTION_INFO_V1(pgs2seninfo);
+
+/*                                                                                                                                                                                                                                                                                                                          * The function prototypes are created as a part of PG_FUNCTION_INFO_V1
+ * macro since 9.4, and hence the declaration of the function prototypes
+ * here is necessary only for 9.3 or before.
+ */
+#if PG_VERSION_NUM < 90400
+Datum	pgs2snippet1(PG_FUNCTION_ARGS);
+Datum	pgs2norm(PG_FUNCTION_ARGS);
+Datum	pgs2textporter1(PG_FUNCTION_ARGS);
 Datum	pgs2seninfo(PG_FUNCTION_ARGS);
+#endif
 
 static sen_encoding	GetSennaEncoding(void);
 static sen_query	*GetSennaQuery(char *str, size_t len);
