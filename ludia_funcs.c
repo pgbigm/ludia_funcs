@@ -65,7 +65,8 @@ PG_FUNCTION_INFO_V1(pgs2norm);
 PG_FUNCTION_INFO_V1(pgs2textporter1);
 PG_FUNCTION_INFO_V1(pgs2seninfo);
 
-/*                                                                                                                                                                                                                                                                                                                          * The function prototypes are created as a part of PG_FUNCTION_INFO_V1
+/*
+ * The function prototypes are created as a part of PG_FUNCTION_INFO_V1
  * macro since 9.4, and hence the declaration of the function prototypes
  * here is necessary only for 9.3 or before.
  */
