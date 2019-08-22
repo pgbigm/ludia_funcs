@@ -1021,7 +1021,11 @@ pgs2seninfo(PG_FUNCTION_ARGS)
 	 * Construct a tuple descriptor for the result row. This must
 	 * match this function's ludia_funcs--x.x.sql entry.
 	 */
+#if PG_VERSION_NUM >= 120000
+	tupdesc = CreateTemplateTupleDesc(2);
+#else
 	tupdesc = CreateTemplateTupleDesc(2, false);
+#endif
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1,
 					   "version", TEXTOID, -1, 0);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 2,
