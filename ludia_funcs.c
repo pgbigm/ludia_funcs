@@ -915,7 +915,9 @@ pgs2norm(PG_FUNCTION_ARGS)
 		}
 #endif
 
-		PG_RETURN_TEXT_P(pnstrdup(norm_result, norm_reslen));
+		result = (text *) palloc(norm_reslen);
+		memcpy(result, norm_result, norm_reslen);
+		PG_RETURN_TEXT_P(result);
 	}
 
 	/* Confirm that database encoding is UTF-8 */
