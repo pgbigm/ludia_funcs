@@ -1,0 +1,567 @@
+\pset null '(null)'
+-- Load ludia_funcs module
+CREATE EXTENSION ludia_funcs;
+-- DMC_GETTEXT_OPT_CRLF
+SET ludia_funcs.textporter_option = 8;
+SET ludia_funcs.textporter_error TO warning;
+-- Test whether pgs2textporter1() can extract the contents from
+-- various types of input files.
+SELECT pgs2snippet1(1,300,1,'∇','∇',0,'データベース',pgs2textporter1('@abs_srcdir@/data/test.txt'));
+                            pgs2snippet1                            
+--------------------------------------------------------------------
+ PostgreSQLは∇データベース∇です。PostgreSQLはオープンソースです。\r+
+ PostgreSQLは∇データベース∇です。PostgreSQLはオープンソースです。\r+
+ PostgreSQLは∇データベース∇です。PostgreSQLはオープンソースです。\r+
+ PostgreSQLは∇データベース∇です。Postg
+(1 row)
+
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+             pgs2textporter1             
+-----------------------------------------
+ ﻿PostgreSQLはオープンソースのDBMSです\r+
+ 
+(1 row)
+
+SELECT pgs2textporter1('@abs_srcdir@/data/test.xlsx');
+          pgs2textporter1          
+-----------------------------------
+ ﻿"OSS-DB"\r                      +
+ "PostgreSQL","MySQL","Firebird"\r+
+ \r                               +
+ 
+(1 row)
+
+SELECT pgs2textporter1('@abs_srcdir@/data/powerpoint2007_test.pptx');
+     pgs2textporter1     
+-------------------------
+ ﻿PowerPoint test File\r+
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ PowerPoint test File\r +
+ TEST\r                 +
+ 
+(1 row)
+
+SELECT pgs2textporter1('@abs_srcdir@/data/pdf1.5_test.pdf');
+    pgs2textporter1     
+------------------------
+ ﻿ \r                  +
+ PDF＿テストファイル \r+
+  \r                   +
+  PDF ファイル \r      +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+ PDF ファイル \r       +
+    \r                 +
+ END \r                +
+  \r                   +
+ 
+(1 row)
+
+SELECT pgs2textporter1('@abs_srcdir@/data/csv_test.csv');
+        pgs2textporter1         
+--------------------------------
+ ﻿■CSVテストファイル,,,\r      +
+ ,,,\r                         +
+ CSV,ABCDEFG,CSVファイル,1234\r+
+ CSV,ABCDEFG,CSVファイル,1235\r+
+ CSV,ABCDEFG,CSVファイル,1236\r+
+ CSV,ABCDEFG,CSVファイル,1237\r+
+ CSV,ABCDEFG,CSVファイル,1238\r+
+ CSV,ABCDEFG,CSVファイル,1239\r+
+ CSV,ABCDEFG,CSVファイル,1240\r+
+ CSV,ABCDEFG,CSVファイル,1241\r+
+ CSV,ABCDEFG,CSVファイル,1242\r+
+ CSV,ABCDEFG,CSVファイル,1243\r+
+ CSV,ABCDEFG,CSVファイル,1244\r+
+ CSV,ABCDEFG,CSVファイル,1245\r+
+ CSV,ABCDEFG,CSVファイル,1246\r+
+ CSV,ABCDEFG,CSVファイル,1247\r+
+ CSV,ABCDEFG,CSVファイル,1248\r+
+ CSV,ABCDEFG,CSVファイル,1249\r+
+ CSV,ABCDEFG,CSVファイル,1250\r+
+ CSV,ABCDEFG,CSVファイル,1251\r+
+ CSV,ABCDEFG,CSVファイル,1252\r+
+ CSV,ABCDEFG,CSVファイル,1253\r+
+ CSV,ABCDEFG,CSVファイル,1254\r+
+ CSV,ABCDEFG,CSVファイル,1255\r+
+ CSV,ABCDEFG,CSVファイル,1256\r+
+ CSV,ABCDEFG,CSVファイル,1257\r+
+ CSV,ABCDEFG,CSVファイル,1258\r+
+ CSV,ABCDEFG,CSVファイル,1259\r+
+ CSV,ABCDEFG,CSVファイル,1260\r+
+ CSV,ABCDEFG,CSVファイル,1261\r+
+ CSV,ABCDEFG,CSVファイル,1262\r+
+ CSV,ABCDEFG,CSVファイル,1263\r+
+ CSV,ABCDEFG,CSVファイル,1264\r+
+ CSV,ABCDEFG,CSVファイル,1265\r+
+ CSV,ABCDEFG,CSVファイル,1266\r+
+ CSV,ABCDEFG,CSVファイル,1267\r+
+ CSV,ABCDEFG,CSVファイル,1268\r+
+ CSV,ABCDEFG,CSVファイル,1269\r+
+ CSV,ABCDEFG,CSVファイル,1270\r+
+ CSV,ABCDEFG,CSVファイル,1271\r+
+ CSV,ABCDEFG,CSVファイル,1272\r+
+ CSV,ABCDEFG,CSVファイル,1273\r+
+ CSV,ABCDEFG,CSVファイル,1274\r+
+ CSV,ABCDEFG,CSVファイル,1275\r+
+ CSV,ABCDEFG,CSVファイル,1276\r+
+ CSV,ABCDEFG,CSVファイル,1277\r+
+ CSV,ABCDEFG,CSVファイル,1278\r+
+ CSV,ABCDEFG,CSVファイル,1279\r+
+ CSV,ABCDEFG,CSVファイル,1280\r+
+ CSV,ABCDEFG,CSVファイル,1281\r+
+ CSV,ABCDEFG,CSVファイル,1282\r+
+ CSV,ABCDEFG,CSVファイル,1283\r+
+ CSV,ABCDEFG,CSVファイル,1284\r+
+ CSV,ABCDEFG,CSVファイル,1285\r+
+ CSV,ABCDEFG,CSVファイル,1286\r+
+ CSV,ABCDEFG,CSVファイル,1287\r+
+ CSV,ABCDEFG,CSVファイル,1288\r+
+ CSV,ABCDEFG,CSVファイル,1289\r+
+ CSV,ABCDEFG,CSVファイル,1290\r+
+ CSV,ABCDEFG,CSVファイル,1291\r+
+ CSV,ABCDEFG,CSVファイル,1292\r+
+ CSV,ABCDEFG,CSVファイル,1293\r+
+ CSV,ABCDEFG,CSVファイル,1294\r+
+ CSV,ABCDEFG,CSVファイル,1295\r+
+ CSV,ABCDEFG,CSVファイル,1296\r+
+ CSV,ABCDEFG,CSVファイル,1297\r+
+ CSV,ABCDEFG,CSVファイル,1298\r+
+ CSV,ABCDEFG,CSVファイル,1299\r+
+ CSV,ABCDEFG,CSVファイル,1300\r+
+ CSV,ABCDEFG,CSVファイル,1301\r+
+ CSV,ABCDEFG,CSVファイル,1302\r+
+ CSV,ABCDEFG,CSVファイル,1303\r+
+ CSV,ABCDEFG,CSVファイル,1304\r+
+ CSV,ABCDEFG,CSVファイル,1305\r+
+ CSV,ABCDEFG,CSVファイル,1306\r+
+ CSV,ABCDEFG,CSVファイル,1307\r+
+ CSV,ABCDEFG,CSVファイル,1308\r+
+ CSV,ABCDEFG,CSVファイル,1309\r+
+ CSV,ABCDEFG,CSVファイル,1310\r+
+ CSV,ABCDEFG,CSVファイル,1311\r+
+ CSV,ABCDEFG,CSVファイル,1312\r+
+ CSV,ABCDEFG,CSVファイル,1313\r+
+ CSV,ABCDEFG,CSVファイル,1314\r+
+ CSV,ABCDEFG,CSVファイル,1315\r+
+ CSV,ABCDEFG,CSVファイル,1316\r+
+ CSV,ABCDEFG,CSVファイル,1317\r+
+ CSV,ABCDEFG,CSVファイル,1318\r+
+ CSV,ABCDEFG,CSVファイル,1319\r+
+ CSV,ABCDEFG,CSVファイル,1320\r+
+ CSV,ABCDEFG,CSVファイル,1321\r+
+ CSV,ABCDEFG,CSVファイル,1322\r+
+ CSV,ABCDEFG,CSVファイル,1323\r+
+ CSV,ABCDEFG,CSVファイル,1324\r+
+ CSV,ABCDEFG,CSVファイル,1325\r+
+ CSV,ABCDEFG,CSVファイル,1326\r+
+ CSV,ABCDEFG,CSVファイル,1327\r+
+ CSV,ABCDEFG,CSVファイル,1328\r+
+ CSV,ABCDEFG,CSVファイル,1329\r+
+ CSV,ABCDEFG,CSVファイル,1330\r+
+ CSV,ABCDEFG,CSVファイル,1331\r+
+ CSV,ABCDEFG,CSVファイル,1332\r+
+ 
+(1 row)
+
+-- Test whether the setting of textporter_option affects the behavior of
+-- pgs2textporter1() expectedly.
+-- DMC_GETTEXT_OPT_CSV1 and DMC_GETTEXT_OPT_CRLF
+SET ludia_funcs.textporter_option TO 16777224;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.xlsx');
+       pgs2textporter1       
+-----------------------------
+ ﻿OSS-DB\r                  +
+ PostgreSQL,MySQL,Firebird\r+
+ \r                         +
+ 
+(1 row)
+
+-- DMC_GETTEXT_OPT_SHFTAG and DMC_GETTEXT_OPT_LF
+SET ludia_funcs.textporter_option = 262160;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.xlsx');
+                    pgs2textporter1                    
+-------------------------------------------------------
+ ﻿<Sheet1:OSS-DB>\r"PostgreSQL","MySQL","Firebird"\r\r
+(1 row)
+
+-- Test the case where textporter_option is set to the minimum value.
+SET ludia_funcs.textporter_option = 0;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+             pgs2textporter1             
+-----------------------------------------
+ ﻿PostgreSQLはオープンソースのDBMSです\r+
+ 
+(1 row)
+
+-- Test the case where textporter_option is set to the maximum value.
+SET ludia_funcs.textporter_option = 4294967295;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+            pgs2textporter1            
+---------------------------------------
+ ﻿PostgreSQLはオープンソースのDBMSです
+(1 row)
+
+-- Test the cases where textporter_option is set to the invalid value.
+SET ludia_funcs.textporter_option = -1;
+ERROR:  invalid value for parameter "ludia_funcs.textporter_option": "-1"
+HINT:  Value exceeds unsigned integer range.
+SET ludia_funcs.textporter_option = 4294967296;
+ERROR:  invalid value for parameter "ludia_funcs.textporter_option": "4294967296"
+HINT:  Value exceeds unsigned integer range.
+SET ludia_funcs.textporter_option = 'a';
+ERROR:  invalid value for parameter "ludia_funcs.textporter_option": "a"
+-- Test whether the setting of textporter_error affects the behavior of
+-- pgs2textporter1() expectedly.
+SET ludia_funcs.textporter_error TO notice;
+SELECT pgs2textporter1('@abs_srcdir@/data/noexist');
+NOTICE:  could not get text from application file "@abs_srcdir@/data/noexist"
+DETAIL:  DMC_GetText_V5() failed with errcode 2001
+ pgs2textporter1 
+-----------------
+ (null)
+(1 row)
+
+SET ludia_funcs.textporter_error TO error;
+SELECT pgs2textporter1('@abs_srcdir@/data/noexist');
+ERROR:  could not get text from application file "@abs_srcdir@/data/noexist"
+DETAIL:  DMC_GetText_V5() failed with errcode 2001
+-- Clean up ludia_funcs module
+DROP EXTENSION ludia_funcs;
+-- Test the case where database encoding is not UTF8
+\c regtest_ludia_funcs_eucjp
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
+ERROR:  does not support database encoding "EUC_JP"
