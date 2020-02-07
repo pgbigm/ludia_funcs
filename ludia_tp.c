@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
  *
- * Copyright (c) 2016-2019, ludia_funcs Development Group
+ * Copyright (c) 2016-2020, ludia_funcs Development Group
  * Copyright (c) 2006-2015, NTT DATA Corporation
  * All rights reserved.
  *
