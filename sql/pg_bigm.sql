@@ -384,8 +384,17 @@ EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('　'))
     ORDER BY col1;
 
--- Test whether recheck is skipped expectedly when keyword length is 1 or 2
-SET ludia_funcs.enable_debug TO on;
+-- Test whether recheck is skipped expectedly when keyword length is 1 or 2.
+-- We can judge that recheck is skipped successfully if the debug messages
+-- indicating the calls to pgs2norm() and pgs2malloc() are logged only once
+-- respectively. So this test must run with enable_debug enabled.
+-- Note that enable_debug must be set to 'terse' in order to stabilize the
+-- result of this regression test. Otherwise, i.e., when enable_debug is set to
+-- 'on', the contents dealt in function pgs2malloc() and pgs2norm() are logged,
+-- and the order of those debug messages varies depending on the block size
+-- in PostgreSQL server. Those detailed information are not necessary to
+-- judge whether the recheck is skipped or not.
+SET ludia_funcs.enable_debug TO terse;
 SELECT col1 FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都')) ORDER BY col1;
 SELECT col1 FROM text_tbl

@@ -1066,30 +1066,39 @@ EXPLAIN (costs off) SELECT replace(col1, E'\t', '*') FROM text_tbl
                Index Cond: (pgs2norm(col1) ~~ '% %'::text)
 (6 rows)
 
--- Test whether recheck is skipped expectedly when keyword length is 1 or 2
-SET ludia_funcs.enable_debug TO on;
+-- Test whether recheck is skipped expectedly when keyword length is 1 or 2.
+-- We can judge that recheck is skipped successfully if the debug messages
+-- indicating the calls to pgs2norm() and pgs2malloc() are logged only once
+-- respectively. So this test must run with enable_debug enabled.
+-- Note that enable_debug must be set to 'terse' in order to stabilize the
+-- result of this regression test. Otherwise, i.e., when enable_debug is set to
+-- 'on', the contents dealt in function pgs2malloc() and pgs2norm() are logged,
+-- and the order of those debug messages varies depending on the block size
+-- in PostgreSQL server. Those detailed information are not necessary to
+-- judge whether the recheck is skipped or not.
+SET ludia_funcs.enable_debug TO terse;
 SELECT col1 FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都')) ORDER BY col1;
-LOG:  pgs2malloc(): buflen 2048, needed 22, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都
-LOG:  pgs2malloc(): buflen 2048, needed 46, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都山田太郎
-LOG:  pgs2malloc(): buflen 2048, needed 22, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都
-LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都 山田太郎
-LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都山田 太郎
-LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都 山田 太郎
-LOG:  pgs2malloc(): buflen 2048, needed 47, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都	山田太郎
-LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都山田　太郎
-LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都  山田太郎
-LOG:  pgs2malloc(): buflen 2048, needed 34, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京と京都
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
        col1       
 ------------------
  東京都
@@ -1104,8 +1113,8 @@ LOG:  pgs2norm(): complete (set result cache): 東京と京都
 
 SELECT col1 FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京都')) ORDER BY col1;
-LOG:  pgs2malloc(): buflen 2048, needed 16, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 京都
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
        col1       
 ------------------
  東京と京都
@@ -1121,8 +1130,8 @@ LOG:  pgs2norm(): complete (set result cache): 京都
 
 SELECT col1 FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('京')) ORDER BY col1;
-LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 京
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
        col1       
 ------------------
  東京と京都
@@ -1138,16 +1147,16 @@ LOG:  pgs2norm(): complete (set result cache): 京
 
 SELECT pgs2snippet1(1, 50, 1, '*', '*', 0, '東', col1) FROM text_tbl
     WHERE pgs2norm(col2) LIKE likequery(pgs2norm('東')) ORDER BY col1;
-LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東
-LOG:  GetSennaQuery(): quick exit: 東
-LOG:  GetSennaQuery(): quick exit: 東
-LOG:  GetSennaQuery(): quick exit: 東
-LOG:  GetSennaQuery(): quick exit: 東
-LOG:  GetSennaQuery(): quick exit: 東
-LOG:  GetSennaQuery(): quick exit: 東
-LOG:  GetSennaQuery(): quick exit: 東
-LOG:  GetSennaQuery(): quick exit: 東
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  GetSennaQuery(): quick exit
+LOG:  GetSennaQuery(): quick exit
+LOG:  GetSennaQuery(): quick exit
+LOG:  GetSennaQuery(): quick exit
+LOG:  GetSennaQuery(): quick exit
+LOG:  GetSennaQuery(): quick exit
+LOG:  GetSennaQuery(): quick exit
+LOG:  GetSennaQuery(): quick exit
        pgs2snippet1       
 --------------------------
  *東*京と京都
@@ -1164,10 +1173,10 @@ LOG:  GetSennaQuery(): quick exit: 東
 SELECT col1 FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山'))
     AND pgs2norm(col1) LIKE likequery(pgs2norm('京'));
-LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 山
-LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 京
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
        col1       
 ------------------
  東京都山田太郎
@@ -1182,10 +1191,10 @@ LOG:  pgs2norm(): complete (set result cache): 京
 SELECT col1 FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('山田'))
     AND pgs2norm(col1) LIKE likequery(pgs2norm('京都'));
-LOG:  pgs2malloc(): buflen 2048, needed 16, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 山田
-LOG:  pgs2malloc(): buflen 2048, needed 16, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 京都
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
        col1       
 ------------------
  東京都山田太郎
@@ -1200,31 +1209,31 @@ LOG:  pgs2norm(): complete (set result cache): 京都
 SELECT col1 FROM text_tbl
     WHERE pgs2norm(col1) LIKE likequery(pgs2norm('東京都'))
     AND pgs2norm(col1) LIKE likequery(pgs2norm('太'));
-LOG:  pgs2malloc(): buflen 2048, needed 22, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都
-LOG:  pgs2malloc(): buflen 2048, needed 10, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 太
-LOG:  pgs2malloc(): buflen 2048, needed 46, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都山田太郎
-LOG:  pgs2norm(): quick exit: 東京都山田太郎
-LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都 山田太郎
-LOG:  pgs2norm(): quick exit: 東京都 山田太郎
-LOG:  pgs2malloc(): buflen 2048, needed 48, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都山田 太郎
-LOG:  pgs2norm(): quick exit: 東京都山田 太郎
-LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都 山田 太郎
-LOG:  pgs2norm(): quick exit: 東京都 山田 太郎
-LOG:  pgs2malloc(): buflen 2048, needed 47, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都	山田太郎
-LOG:  pgs2norm(): quick exit: 東京都	山田太郎
-LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都山田　太郎
-LOG:  pgs2norm(): quick exit: 東京都山田　太郎
-LOG:  pgs2malloc(): buflen 2048, needed 50, maxlen 4194304
-LOG:  pgs2norm(): complete (set result cache): 東京都  山田太郎
-LOG:  pgs2norm(): quick exit: 東京都  山田太郎
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2norm(): quick exit
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2norm(): quick exit
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2norm(): quick exit
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2norm(): quick exit
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2norm(): quick exit
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2norm(): quick exit
+LOG:  pgs2malloc()
+LOG:  pgs2norm(): complete
+LOG:  pgs2norm(): quick exit
        col1       
 ------------------
  東京都山田太郎

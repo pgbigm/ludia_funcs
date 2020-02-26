@@ -40,8 +40,31 @@ PG_MODULE_MAGIC;
 
 /* GUC variables */
 #ifdef PGS2_DEBUG
-static bool	pgs2_enable_debug = false;
-#endif
+typedef enum pgs2_enable_debug_type
+{
+    PGS2_ENABLE_DEBUG_OFF,		/* logs no debug log */
+    PGS2_ENABLE_DEBUG_TERSE,	/* logs tersely, e.g., just names of
+								   functions */
+    PGS2_ENABLE_DEBUG_ON		/* logs detailed infomation */
+} pgs2_enable_debug_type;
+
+/* We accept all the likely variants of "on" and "off" */
+static const struct config_enum_entry pgs2_enable_debug_options[] = {
+	{"off", PGS2_ENABLE_DEBUG_OFF, false},
+	{"terse", PGS2_ENABLE_DEBUG_TERSE, false},
+	{"on", PGS2_ENABLE_DEBUG_ON, false},
+	{"true", PGS2_ENABLE_DEBUG_ON, true},
+	{"false", PGS2_ENABLE_DEBUG_OFF, true},
+	{"yes", PGS2_ENABLE_DEBUG_ON, true},
+	{"no", PGS2_ENABLE_DEBUG_OFF, true},
+	{"1", PGS2_ENABLE_DEBUG_ON, true},
+	{"0", PGS2_ENABLE_DEBUG_OFF, true},
+	{NULL, 0, false}
+};
+
+static int	pgs2_enable_debug = PGS2_ENABLE_DEBUG_OFF;
+#endif	/* PGS2_DEBUG */
+
 static char	*pgs2_last_update = NULL;
 static int	norm_cache_limit = -1;
 static bool	escape_snippet_keyword = false;
@@ -132,11 +155,12 @@ _PG_init(void)
 
 #ifdef PGS2_DEBUG
 	/* Define custom GUC variable for debugging */
-	DefineCustomBoolVariable("ludia_funcs.enable_debug",
+	DefineCustomEnumVariable("ludia_funcs.enable_debug",
 							 "Emit ludia_funcs debugging output.",
 							 NULL,
 							 &pgs2_enable_debug,
-							 false,
+							 PGS2_ENABLE_DEBUG_OFF,
+							 pgs2_enable_debug_options,
 							 PGC_USERSET,
 							 0,
 							 NULL,
@@ -626,13 +650,15 @@ EscapeSnippetKeyword(char **s, size_t *slen)
 	*slen = ep - *s;
 
 #ifdef PGS2_DEBUG
-	if (pgs2_enable_debug)
+	if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_ON)
 	{
 		char	*tmp = pnstrdup(*s, *slen);
 
 		elog(LOG, "escaped snippet keyword: %s", tmp);
 		pfree(tmp);
 	}
+	else if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_TERSE)
+		elog(LOG, "escaped snippet keyword");
 #endif
 
 	return true;
@@ -662,13 +688,15 @@ GetSennaQuery(char *str, size_t len)
 		escape_snippet_keyword == guc_cache)
 	{
 #ifdef PGS2_DEBUG
-		if (pgs2_enable_debug)
+		if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_ON)
 		{
 			char	*tmp = pnstrdup(str, len);
 
 			elog(LOG, "GetSennaQuery(): quick exit: %s", tmp);
 			pfree(tmp);
 		}
+		else if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_TERSE)
+				elog(LOG, "GetSennaQuery(): quick exit");
 #endif
 		return query_cache;
 	}
@@ -809,9 +837,11 @@ static inline void
 pgs2malloc(void **buf, long *buflen, long needed, long maxlen)
 {
 #ifdef PGS2_DEBUG
-	if (pgs2_enable_debug)
+	if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_ON)
 		elog(LOG, "pgs2malloc(): buflen %ld, needed %ld, maxlen %ld",
 			 *buflen, needed, maxlen);
+	else if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_TERSE)
+		elog(LOG, "pgs2malloc()");
 #endif
 
 	if (*buf != NULL && *buflen >= needed && (*buflen <= maxlen || maxlen == 0))
@@ -907,13 +937,15 @@ pgs2norm(PG_FUNCTION_ARGS)
 		strncmp(norm_cache, s, slen) == 0)
 	{
 #ifdef PGS2_DEBUG
-		if (pgs2_enable_debug)
+		if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_ON)
 		{
 			char	*tmp = text_to_cstring(str);
 
 			elog(LOG, "pgs2norm(): quick exit: %s", tmp);
 			pfree(tmp);
 		}
+		else if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_TERSE)
+				elog(LOG, "pgs2norm(): quick exit");
 #endif
 
 		result = (text *) palloc(norm_reslen);
@@ -987,7 +1019,7 @@ retry:
 	}
 
 #ifdef PGS2_DEBUG
-	if (pgs2_enable_debug)
+	if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_ON)
 	{
 		char	*tmp = text_to_cstring(str);
 
@@ -995,6 +1027,8 @@ retry:
 			 (norm_cache == NULL) ? "unset" : "set", tmp);
 		pfree(tmp);
 	}
+	else if (pgs2_enable_debug == PGS2_ENABLE_DEBUG_TERSE)
+			elog(LOG, "pgs2norm(): complete");
 #endif
 
 	PG_RETURN_TEXT_P(result);
