@@ -49,6 +49,7 @@ before_script:
    - make USE_PGXS=1 PG_CONFIG=${PG_CONFIG} SENNA_CFG=${SENNA_CFG} PGS2_DEBUG=1 install
 
 script:
+   - make USE_PGXS=1 PG_CONFIG=${PG_CONFIG} SENNA_CFG=${SENNA_CFG} PGS2_DEBUG=1 installcheck
    - make USE_PGXS=1 PG_CONFIG=${PG_CONFIG} SENNA_CFG=${SENNA_CFG} PGS2_DEBUG=1 installcheck-bigm
 
 after_script:
