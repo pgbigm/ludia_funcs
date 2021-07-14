@@ -6,4 +6,4 @@ Ludia functionsが提供する各モジュールのライセンスは、LGPLv2.1
 より詳細な情報については、[Ludia functionsの公式サイト](https://ludiafuncs.osdn.jp/index.html)を参照してください。
 
 ## Test Status
-[![Build Status](https://travis-ci.org/pgbigm/ludia_funcs.svg?branch=master)](https://travis-ci.org/pgbigm/ludia_funcs)
+[![Build Status](https://travis-ci.com/pgbigm/ludia_funcs.svg?branch=master)](https://travis-ci.com/github/pgbigm/ludia_funcs)
