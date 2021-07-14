@@ -6,6 +6,7 @@ CREATE EXTENSION ludia_funcs;
 -- DMC_GETTEXT_OPT_CRLF
 SET ludia_funcs.textporter_option = 8;
 SET ludia_funcs.textporter_error TO warning;
+SET ludia_funcs.textporter_exit_on_segv TO off;
 
 -- Test whether pgs2textporter1() can extract the contents from
 -- various types of input files.
@@ -46,6 +47,11 @@ SET ludia_funcs.textporter_error TO notice;
 SELECT pgs2textporter1('@abs_srcdir@/data/noexist');
 SET ludia_funcs.textporter_error TO error;
 SELECT pgs2textporter1('@abs_srcdir@/data/noexist');
+
+-- Test whether pgs2textporter1() can extract the contents
+-- even when textporter_exit_on_segv is enabled.
+SET ludia_funcs.textporter_exit_on_segv TO on;
+SELECT pgs2textporter1('@abs_srcdir@/data/test.docx');
 
 -- Clean up ludia_funcs module
 DROP EXTENSION ludia_funcs;

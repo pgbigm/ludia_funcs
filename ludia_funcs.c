@@ -121,6 +121,7 @@ static bool			EscapeSnippetKeyword(char **s, size_t *slen);
 /* GUC variables for pgs2textpoter1 */
 static int	textporter_error = ERROR;
 static unsigned int	textporter_option = TEXTPORTER_OPTION;
+static bool	textporter_exit_on_segv = false;
 
 /*
  * This variable is a dummy that doesn't do anything, except in some
@@ -143,6 +144,7 @@ static void CleanupTextPorterTmpFiles(void);
 
 static bool check_textporter_option(char **newval, void **extra, GucSource source);
 static void assign_textporter_option(const char *newval, void *extra);
+static void textporter_exit_on_segv_handler(SIGNAL_ARGS);
 #endif	/* TEXTPORTER */
 
 void	_PG_init(void);
@@ -206,6 +208,17 @@ _PG_init(void)
 							   check_textporter_option,
 							   assign_textporter_option,
 							   NULL);
+
+	DefineCustomBoolVariable("ludia_funcs.textporter_exit_on_segv",
+							 "Terminate session when textporter causes segmentation fault.",
+							 NULL,
+							 &textporter_exit_on_segv,
+							 false,
+							 PGC_USERSET,
+							 0,
+							 NULL,
+							 NULL,
+							 NULL);
 
 	/* Clean up remaining textporter temporary files */
 	CleanupTextPorterTmpFiles();
@@ -301,6 +314,14 @@ pgs2textporter1(PG_FUNCTION_ARGS)
 					 errmsg("could not close temporary file \"%s\": %m", txtfile)));
 
 		/*
+		 * If textporter_exit_on_segv option is enabled, segmentation fault
+		 * caused by textporter will terminate only this connection and
+		 * not lead to the server crash.
+		 */
+		if (textporter_exit_on_segv)
+			pqsignal(SIGSEGV, textporter_exit_on_segv_handler);
+
+		/*
 		 * Run TextPorter to read text data from application file (appfile)
 		 * to temporary file (txtfile).
 		 */
@@ -311,6 +332,10 @@ pgs2textporter1(PG_FUNCTION_ARGS)
 							 TEXTPORTER_BBIGENDIAN, textporter_option,
 							 TEXTPORTER_OPTION1, TEXTPORTER_SIZE,
 							 TEXTPORTER_CSV_C);
+
+		if (textporter_exit_on_segv)
+			pqsignal(SIGSEGV, SIG_DFL);
+
 		if (ret != 0)
 		{
 			ereport(textporter_error,
@@ -431,6 +456,15 @@ static void
 assign_textporter_option(const char *newval, void *extra)
 {
 	textporter_option = *((unsigned int *) extra);
+}
+
+static void
+textporter_exit_on_segv_handler(SIGNAL_ARGS)
+{
+	ereport(FATAL,
+			(errcode(ERRCODE_INTERNAL_ERROR),
+			 errmsg("terminating PostgreSQL server process due to "
+					"segmentation fault by textporter")));
 }
 
 #else	/* TEXTPORTER */
